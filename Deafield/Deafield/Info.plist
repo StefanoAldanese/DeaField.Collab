@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>NSMicrophoneUsageDescription</key>
+    <string>Need microphone access for uploading audio</string>
+    <key>NSCameraUsageDescription</key>
+    <string>Need camera access for uploading images</string>
+    <key>NSLocationUsageDescription</key>
+    <string>Need location access for updating nearby friends</string>
+    <key>NSLocationWhenInUseUsageDescription</key>
+    <string>This app will use your location to show features near you.</string>
+    <key>NSPhotoLibraryUsageDescription</key>
+    <string>Need photo library access for saving and uploading images</string>
+    <key>NSMicrophoneUsageDescription</key>
+    <string>We need access to the microphone to analyze audio and provide haptic feedback.</string>
+</dict>
+</plist>

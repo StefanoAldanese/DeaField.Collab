@@ -1,0 +1,607 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 56;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		3B527C822B2DF18B00F366F2 /* RecordingViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B527C812B2DF18B00F366F2 /* RecordingViewModel.swift */; };
+		3B7C74912B2DB7B4009D0435 /* DeafieldApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B7C74902B2DB7B4009D0435 /* DeafieldApp.swift */; };
+		3B7C74932B2DB7B4009D0435 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B7C74922B2DB7B4009D0435 /* ContentView.swift */; };
+		3B7C74952B2DB7B5009D0435 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 3B7C74942B2DB7B5009D0435 /* Assets.xcassets */; };
+		3B7C74982B2DB7B5009D0435 /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 3B7C74972B2DB7B5009D0435 /* Preview Assets.xcassets */; };
+		3B7C74A22B2DB7B5009D0435 /* DeafieldTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B7C74A12B2DB7B5009D0435 /* DeafieldTests.swift */; };
+		3B7C74AC2B2DB7B5009D0435 /* DeafieldUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B7C74AB2B2DB7B5009D0435 /* DeafieldUITests.swift */; };
+		3B7C74AE2B2DB7B5009D0435 /* DeafieldUITestsLaunchTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B7C74AD2B2DB7B5009D0435 /* DeafieldUITestsLaunchTests.swift */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		3B7C749E2B2DB7B5009D0435 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 3B7C74852B2DB7B4009D0435 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 3B7C748C2B2DB7B4009D0435;
+			remoteInfo = Deafield;
+		};
+		3B7C74A82B2DB7B5009D0435 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 3B7C74852B2DB7B4009D0435 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 3B7C748C2B2DB7B4009D0435;
+			remoteInfo = Deafield;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXFileReference section */
+		3B527C812B2DF18B00F366F2 /* RecordingViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecordingViewModel.swift; sourceTree = "<group>"; };
+		3B7C748D2B2DB7B4009D0435 /* Deafield.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Deafield.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		3B7C74902B2DB7B4009D0435 /* DeafieldApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeafieldApp.swift; sourceTree = "<group>"; };
+		3B7C74922B2DB7B4009D0435 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
+		3B7C74942B2DB7B5009D0435 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		3B7C74972B2DB7B5009D0435 /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
+		3B7C749D2B2DB7B5009D0435 /* DeafieldTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = DeafieldTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		3B7C74A12B2DB7B5009D0435 /* DeafieldTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeafieldTests.swift; sourceTree = "<group>"; };
+		3B7C74A72B2DB7B5009D0435 /* DeafieldUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = DeafieldUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		3B7C74AB2B2DB7B5009D0435 /* DeafieldUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeafieldUITests.swift; sourceTree = "<group>"; };
+		3B7C74AD2B2DB7B5009D0435 /* DeafieldUITestsLaunchTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeafieldUITestsLaunchTests.swift; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		3B7C748A2B2DB7B4009D0435 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		3B7C749A2B2DB7B5009D0435 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		3B7C74A42B2DB7B5009D0435 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		3B527C832B2DF19500F366F2 /* New Group */ = {
+			isa = PBXGroup;
+			children = (
+				3B527C812B2DF18B00F366F2 /* RecordingViewModel.swift */,
+			);
+			path = "New Group";
+			sourceTree = "<group>";
+		};
+		3B7C74842B2DB7B4009D0435 = {
+			isa = PBXGroup;
+			children = (
+				3B7C748F2B2DB7B4009D0435 /* Deafield */,
+				3B7C74A02B2DB7B5009D0435 /* DeafieldTests */,
+				3B7C74AA2B2DB7B5009D0435 /* DeafieldUITests */,
+				3B7C748E2B2DB7B4009D0435 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		3B7C748E2B2DB7B4009D0435 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				3B7C748D2B2DB7B4009D0435 /* Deafield.app */,
+				3B7C749D2B2DB7B5009D0435 /* DeafieldTests.xctest */,
+				3B7C74A72B2DB7B5009D0435 /* DeafieldUITests.xctest */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		3B7C748F2B2DB7B4009D0435 /* Deafield */ = {
+			isa = PBXGroup;
+			children = (
+				3B7C74902B2DB7B4009D0435 /* DeafieldApp.swift */,
+				3B7C74922B2DB7B4009D0435 /* ContentView.swift */,
+				3B527C832B2DF19500F366F2 /* New Group */,
+				3B7C74942B2DB7B5009D0435 /* Assets.xcassets */,
+				3B7C74962B2DB7B5009D0435 /* Preview Content */,
+			);
+			path = Deafield;
+			sourceTree = "<group>";
+		};
+		3B7C74962B2DB7B5009D0435 /* Preview Content */ = {
+			isa = PBXGroup;
+			children = (
+				3B7C74972B2DB7B5009D0435 /* Preview Assets.xcassets */,
+			);
+			path = "Preview Content";
+			sourceTree = "<group>";
+		};
+		3B7C74A02B2DB7B5009D0435 /* DeafieldTests */ = {
+			isa = PBXGroup;
+			children = (
+				3B7C74A12B2DB7B5009D0435 /* DeafieldTests.swift */,
+			);
+			path = DeafieldTests;
+			sourceTree = "<group>";
+		};
+		3B7C74AA2B2DB7B5009D0435 /* DeafieldUITests */ = {
+			isa = PBXGroup;
+			children = (
+				3B7C74AB2B2DB7B5009D0435 /* DeafieldUITests.swift */,
+				3B7C74AD2B2DB7B5009D0435 /* DeafieldUITestsLaunchTests.swift */,
+			);
+			path = DeafieldUITests;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		3B7C748C2B2DB7B4009D0435 /* Deafield */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 3B7C74B12B2DB7B5009D0435 /* Build configuration list for PBXNativeTarget "Deafield" */;
+			buildPhases = (
+				3B7C74892B2DB7B4009D0435 /* Sources */,
+				3B7C748A2B2DB7B4009D0435 /* Frameworks */,
+				3B7C748B2B2DB7B4009D0435 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = Deafield;
+			productName = Deafield;
+			productReference = 3B7C748D2B2DB7B4009D0435 /* Deafield.app */;
+			productType = "com.apple.product-type.application";
+		};
+		3B7C749C2B2DB7B5009D0435 /* DeafieldTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 3B7C74B42B2DB7B5009D0435 /* Build configuration list for PBXNativeTarget "DeafieldTests" */;
+			buildPhases = (
+				3B7C74992B2DB7B5009D0435 /* Sources */,
+				3B7C749A2B2DB7B5009D0435 /* Frameworks */,
+				3B7C749B2B2DB7B5009D0435 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				3B7C749F2B2DB7B5009D0435 /* PBXTargetDependency */,
+			);
+			name = DeafieldTests;
+			productName = DeafieldTests;
+			productReference = 3B7C749D2B2DB7B5009D0435 /* DeafieldTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
+		3B7C74A62B2DB7B5009D0435 /* DeafieldUITests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 3B7C74B72B2DB7B5009D0435 /* Build configuration list for PBXNativeTarget "DeafieldUITests" */;
+			buildPhases = (
+				3B7C74A32B2DB7B5009D0435 /* Sources */,
+				3B7C74A42B2DB7B5009D0435 /* Frameworks */,
+				3B7C74A52B2DB7B5009D0435 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				3B7C74A92B2DB7B5009D0435 /* PBXTargetDependency */,
+			);
+			name = DeafieldUITests;
+			productName = DeafieldUITests;
+			productReference = 3B7C74A72B2DB7B5009D0435 /* DeafieldUITests.xctest */;
+			productType = "com.apple.product-type.bundle.ui-testing";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		3B7C74852B2DB7B4009D0435 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = 1;
+				LastSwiftUpdateCheck = 1510;
+				LastUpgradeCheck = 1510;
+				TargetAttributes = {
+					3B7C748C2B2DB7B4009D0435 = {
+						CreatedOnToolsVersion = 15.1;
+					};
+					3B7C749C2B2DB7B5009D0435 = {
+						CreatedOnToolsVersion = 15.1;
+						TestTargetID = 3B7C748C2B2DB7B4009D0435;
+					};
+					3B7C74A62B2DB7B5009D0435 = {
+						CreatedOnToolsVersion = 15.1;
+						TestTargetID = 3B7C748C2B2DB7B4009D0435;
+					};
+				};
+			};
+			buildConfigurationList = 3B7C74882B2DB7B4009D0435 /* Build configuration list for PBXProject "Deafield" */;
+			compatibilityVersion = "Xcode 14.0";
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+				Base,
+			);
+			mainGroup = 3B7C74842B2DB7B4009D0435;
+			productRefGroup = 3B7C748E2B2DB7B4009D0435 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				3B7C748C2B2DB7B4009D0435 /* Deafield */,
+				3B7C749C2B2DB7B5009D0435 /* DeafieldTests */,
+				3B7C74A62B2DB7B5009D0435 /* DeafieldUITests */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		3B7C748B2B2DB7B4009D0435 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				3B7C74982B2DB7B5009D0435 /* Preview Assets.xcassets in Resources */,
+				3B7C74952B2DB7B5009D0435 /* Assets.xcassets in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		3B7C749B2B2DB7B5009D0435 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		3B7C74A52B2DB7B5009D0435 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		3B7C74892B2DB7B4009D0435 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				3B7C74932B2DB7B4009D0435 /* ContentView.swift in Sources */,
+				3B527C822B2DF18B00F366F2 /* RecordingViewModel.swift in Sources */,
+				3B7C74912B2DB7B4009D0435 /* DeafieldApp.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		3B7C74992B2DB7B5009D0435 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				3B7C74A22B2DB7B5009D0435 /* DeafieldTests.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		3B7C74A32B2DB7B5009D0435 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				3B7C74AE2B2DB7B5009D0435 /* DeafieldUITestsLaunchTests.swift in Sources */,
+				3B7C74AC2B2DB7B5009D0435 /* DeafieldUITests.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		3B7C749F2B2DB7B5009D0435 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 3B7C748C2B2DB7B4009D0435 /* Deafield */;
+			targetProxy = 3B7C749E2B2DB7B5009D0435 /* PBXContainerItemProxy */;
+		};
+		3B7C74A92B2DB7B5009D0435 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 3B7C748C2B2DB7B4009D0435 /* Deafield */;
+			targetProxy = 3B7C74A82B2DB7B5009D0435 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
+/* Begin XCBuildConfiguration section */
+		3B7C74AF2B2DB7B5009D0435 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.2;
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = iphoneos;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG $(inherited)";
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+			};
+			name = Debug;
+		};
+		3B7C74B02B2DB7B5009D0435 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.2;
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				SDKROOT = iphoneos;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Release;
+		};
+		3B7C74B22B2DB7B5009D0435 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_ASSET_PATHS = "\"Deafield/Preview Content\"";
+				DEVELOPMENT_TEAM = 4W6M7WPX3T;
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = Deafield/Info.plist;
+				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
+				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = Foundation.Deafield;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		3B7C74B32B2DB7B5009D0435 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_ASSET_PATHS = "\"Deafield/Preview Content\"";
+				DEVELOPMENT_TEAM = 4W6M7WPX3T;
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = Deafield/Info.plist;
+				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
+				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = Foundation.Deafield;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
+		3B7C74B52B2DB7B5009D0435 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 97TVR2DD4U;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.2;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = Foundation.DeafieldTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Deafield.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/Deafield";
+			};
+			name = Debug;
+		};
+		3B7C74B62B2DB7B5009D0435 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 97TVR2DD4U;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.2;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = Foundation.DeafieldTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Deafield.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/Deafield";
+			};
+			name = Release;
+		};
+		3B7C74B82B2DB7B5009D0435 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 97TVR2DD4U;
+				GENERATE_INFOPLIST_FILE = YES;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = Foundation.DeafieldUITests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_TARGET_NAME = Deafield;
+			};
+			name = Debug;
+		};
+		3B7C74B92B2DB7B5009D0435 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 97TVR2DD4U;
+				GENERATE_INFOPLIST_FILE = YES;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = Foundation.DeafieldUITests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_TARGET_NAME = Deafield;
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		3B7C74882B2DB7B4009D0435 /* Build configuration list for PBXProject "Deafield" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				3B7C74AF2B2DB7B5009D0435 /* Debug */,
+				3B7C74B02B2DB7B5009D0435 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		3B7C74B12B2DB7B5009D0435 /* Build configuration list for PBXNativeTarget "Deafield" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				3B7C74B22B2DB7B5009D0435 /* Debug */,
+				3B7C74B32B2DB7B5009D0435 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		3B7C74B42B2DB7B5009D0435 /* Build configuration list for PBXNativeTarget "DeafieldTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				3B7C74B52B2DB7B5009D0435 /* Debug */,
+				3B7C74B62B2DB7B5009D0435 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		3B7C74B72B2DB7B5009D0435 /* Build configuration list for PBXNativeTarget "DeafieldUITests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				3B7C74B82B2DB7B5009D0435 /* Debug */,
+				3B7C74B92B2DB7B5009D0435 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = 3B7C74852B2DB7B4009D0435 /* Project object */;
+}
