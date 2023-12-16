@@ -5,30 +5,19 @@
 //  Created by Davide Perrotta on 16/12/23.
 //
 
-
 import SwiftUI
-import AVKit
 import AVFoundation
 
 struct ContentView: View {
-    // State variable to manage the recording state
     @State private var record = false
-
-    // Audio session object to manage audio settings and authorization -- using optional
     @State private var session: AVAudioSession!
-
-    // Audio recording object to record audio from the microphone
     @State private var recorder: AVAudioRecorder!
-
-    // Audio playback object to play the recorded audio
     @State private var audioPlayer: AVAudioPlayer?
-
-    // State variable to manage the appearance of an alert
     @State private var alert = false
-
-    // Array to store the URLs of recorded audio
     @State private var audios: [URL] = []
-
+    @State private var isRecordingOverlayVisible = false
+    @State private var recordingStartTime: Date?
+    
     var body: some View {
         NavigationView {
             VStack {
@@ -43,8 +32,21 @@ struct ContentView: View {
                     }
                     .onDelete(perform: deleteAudio)
                 }
-//                Button for registration
-                Button(action: startStopRecording) {
+//Questa parte non funziona propriamente...dovrebbe fare un overlay dove inserire nome registrazione tempo e spettrogramma
+//                vedi giù l'overlay
+                Button(action: {
+                    startStopRecording()
+                    withAnimation {
+                    
+                        isRecordingOverlayVisible.toggle()
+                        if record {
+                            recordingStartTime = Date()
+                        } else {
+                            recordingStartTime = nil
+                        }
+                    }
+                }) {
+//
                     Image(systemName: record ? "stop.circle.fill" : "circle.fill.record")
                         .resizable()
                         .aspectRatio(contentMode: .fit)
@@ -83,7 +85,48 @@ struct ContentView: View {
                     secondaryButton: .cancel()
                 )
             }
+//questo è il recording overlay
+            // Recording overlay
+            if isRecordingOverlayVisible {
+                ZStack {
+                    Color(UIColor.systemGray6)
+                        .frame(maxWidth: .infinity, maxHeight: .infinity)
+                        .edgesIgnoringSafeArea(.all)
+
+                    VStack(spacing: 20) {
+                        Text("Recording...")
+                            .font(.headline)
+                            .padding()
+
+                        if let startTime = recordingStartTime {
+                            Text("\(formattedRecordingTime(from: startTime))")
+                                .foregroundColor(.red)
+                                .font(.title)
+                        }
+
+                        Button("Stop Recording") {
+                            startStopRecording()
+                            withAnimation {
+                                isRecordingOverlayVisible.toggle()
+                            }
+                        }
+                        .padding()
+                        .foregroundColor(.white)
+                        .background(Color.red)
+                        .cornerRadius(10)
+                    }
+                    .padding()
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+                }
+            }
         }
+    }
+
+    func formattedRecordingTime(from startTime: Date) -> String {
+        let elapsedTime = Date().timeIntervalSince(startTime)
+        let minutes = Int(elapsedTime / 60)
+        let seconds = Int(elapsedTime.truncatingRemainder(dividingBy: 60))
+        return String(format: "%02d:%02d", minutes, seconds)
     }
 
     func getAudios() {
@@ -155,25 +198,15 @@ struct ContentView_Previews: PreviewProvider {
 // Function to get a formatted date from the creation date of a file URL.
 func getFormattedDate(for url: URL) -> String {
     do {
-        // Retrieve file attributes, including the creation date, for the given URL.
         let attributes = try FileManager.default.attributesOfItem(atPath: url.path)
-
-        // Check if the creation date is available.
         if let creationDate = attributes[.creationDate] as? Date {
-            // Create a date formatter for a short date and time style.
             let formatter = DateFormatter()
             formatter.dateStyle = .short
             formatter.timeStyle = .short
-
-            // Format the creation date using the formatter and return the result.
             return formatter.string(from: creationDate)
         }
     } catch {
-        // Handle any errors that occur during the process and print an error message.
         print("Error getting file attributes: \(error.localizedDescription)")
     }
-
-    // Return an empty string if the creation date is not available or an error occurs.
     return ""
 }
-

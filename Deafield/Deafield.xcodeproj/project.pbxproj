@@ -3,11 +3,11 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 56;
+	objectVersion = 60;
 	objects = {
 
 /* Begin PBXBuildFile section */
-		3B527C822B2DF18B00F366F2 /* RecordingViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B527C812B2DF18B00F366F2 /* RecordingViewModel.swift */; };
+		3B527C862B2DF5EE00F366F2 /* AudioKit in Frameworks */ = {isa = PBXBuildFile; productRef = 3B527C852B2DF5EE00F366F2 /* AudioKit */; };
 		3B7C74912B2DB7B4009D0435 /* DeafieldApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B7C74902B2DB7B4009D0435 /* DeafieldApp.swift */; };
 		3B7C74932B2DB7B4009D0435 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B7C74922B2DB7B4009D0435 /* ContentView.swift */; };
 		3B7C74952B2DB7B5009D0435 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 3B7C74942B2DB7B5009D0435 /* Assets.xcassets */; };
@@ -35,7 +35,6 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
-		3B527C812B2DF18B00F366F2 /* RecordingViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecordingViewModel.swift; sourceTree = "<group>"; };
 		3B7C748D2B2DB7B4009D0435 /* Deafield.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Deafield.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		3B7C74902B2DB7B4009D0435 /* DeafieldApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeafieldApp.swift; sourceTree = "<group>"; };
 		3B7C74922B2DB7B4009D0435 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
@@ -53,6 +52,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				3B527C862B2DF5EE00F366F2 /* AudioKit in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -73,14 +73,6 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
-		3B527C832B2DF19500F366F2 /* New Group */ = {
-			isa = PBXGroup;
-			children = (
-				3B527C812B2DF18B00F366F2 /* RecordingViewModel.swift */,
-			);
-			path = "New Group";
-			sourceTree = "<group>";
-		};
 		3B7C74842B2DB7B4009D0435 = {
 			isa = PBXGroup;
 			children = (
@@ -106,7 +98,6 @@
 			children = (
 				3B7C74902B2DB7B4009D0435 /* DeafieldApp.swift */,
 				3B7C74922B2DB7B4009D0435 /* ContentView.swift */,
-				3B527C832B2DF19500F366F2 /* New Group */,
 				3B7C74942B2DB7B5009D0435 /* Assets.xcassets */,
 				3B7C74962B2DB7B5009D0435 /* Preview Content */,
 			);
@@ -154,6 +145,9 @@
 			dependencies = (
 			);
 			name = Deafield;
+			packageProductDependencies = (
+				3B527C852B2DF5EE00F366F2 /* AudioKit */,
+			);
 			productName = Deafield;
 			productReference = 3B7C748D2B2DB7B4009D0435 /* Deafield.app */;
 			productType = "com.apple.product-type.application";
@@ -226,6 +220,9 @@
 				Base,
 			);
 			mainGroup = 3B7C74842B2DB7B4009D0435;
+			packageReferences = (
+				3B527C842B2DF5EE00F366F2 /* XCLocalSwiftPackageReference "../AudioKit-main" */,
+			);
 			productRefGroup = 3B7C748E2B2DB7B4009D0435 /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
@@ -269,7 +266,6 @@
 			buildActionMask = 2147483647;
 			files = (
 				3B7C74932B2DB7B4009D0435 /* ContentView.swift in Sources */,
-				3B527C822B2DF18B00F366F2 /* RecordingViewModel.swift in Sources */,
 				3B7C74912B2DB7B4009D0435 /* DeafieldApp.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -602,6 +598,20 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCLocalSwiftPackageReference section */
+		3B527C842B2DF5EE00F366F2 /* XCLocalSwiftPackageReference "../AudioKit-main" */ = {
+			isa = XCLocalSwiftPackageReference;
+			relativePath = "../AudioKit-main";
+		};
+/* End XCLocalSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		3B527C852B2DF5EE00F366F2 /* AudioKit */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = AudioKit;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = 3B7C74852B2DB7B4009D0435 /* Project object */;
 }
