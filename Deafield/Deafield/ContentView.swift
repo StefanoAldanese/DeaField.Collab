@@ -9,153 +9,181 @@ import SwiftUI
 import AVFoundation
 
 struct ContentView: View {
-    @State private var record = false
-    @State private var session: AVAudioSession!
-    @State private var recorder: AVAudioRecorder!
-    @State private var audioPlayer: AVAudioPlayer?
-    @State private var alert = false
-    @State private var audios: [URL] = []
-    @State private var isRecordingOverlayVisible = false
-    @State private var recordingStartTime: Date?
-    
+    // Stati per gestire la registrazione e la visualizzazione degli alert
+    @State private var isRecording = false
+    @State private var numberOfRecords = 0
+    @State private var recordings: [URL] = []
+    @State private var showAlert = false
+    @State private var showStopAlert = false
+    @State private var audioRecorder: AVAudioRecorder?
+    @State private var buttonColor: Color = .blue
+    // Variabile di stato per gestire la modifica del nome del file
+    @State private var newName = ""
+    @State private var currentlyEditingIndex: Int?
+
     var body: some View {
         NavigationView {
             VStack {
                 List {
-                    ForEach(audios, id: \.self) { audio in
-                        VStack(alignment: .leading) {
-                            Text(audio.lastPathComponent)
-                            Text(getFormattedDate(for: audio))
-                                .font(.caption)
-                                .foregroundColor(.gray)
+                    ForEach(0..<numberOfRecords, id: \.self) { index in
+                        if index < recordings.count {
+                            NavigationLink(
+                                destination: RecordingDetailView(recordURL: recordings[index], index: index, recordings: $recordings, onRename: {
+                                    loadPreviousRecords()  // Aggiorna la lista dei record
+                                }),
+                                label: {
+                                    Text("\(newName(forIndex: index))")
+                                }
+                            )
                         }
                     }
-                    .onDelete(perform: deleteAudio)
+                    .onDelete(perform: deleteRecording)
                 }
-//Questa parte non funziona propriamente...dovrebbe fare un overlay dove inserire nome registrazione tempo e spettrogramma
-//                vedi giù l'overlay
-                Button(action: {
-                    startStopRecording()
-                    withAnimation {
-                    
-                        isRecordingOverlayVisible.toggle()
-                        if record {
-                            recordingStartTime = Date()
-                        } else {
-                            recordingStartTime = nil
-                        }
-                    }
-                }) {
-//
-                    Image(systemName: record ? "stop.circle.fill" : "circle.fill.record")
-                        .resizable()
-                        .aspectRatio(contentMode: .fit)
-                        .frame(width: 70, height: 70)
-                        .foregroundColor(.red)
-                        .background(record ? Color.clear : Color.red)
-                        .clipShape(Circle())
-                }
-                .padding(.vertical, 25)
-            }
-            .navigationBarTitle("Memo Vocali", displayMode: .inline)
-            .background(Color(UIColor.systemGroupedBackground))
-            .onAppear {
-                Task {
-                    do {
-                        session = AVAudioSession.sharedInstance()
-                        try session.setCategory(.playAndRecord)
+                .padding(10)
 
-                        if await AVAudioApplication.requestRecordPermission() {
-                            self.getAudios()
-                        } else {
-                            self.alert.toggle()
-                        }
-                    } catch {
-                        print("Audio session setup error: \(error.localizedDescription)")
-                    }
+                Button(action: {
+                    toggleRecording()
+                }) {
+                    Text(isRecording ? "Stop Recording" : "Start Recording")
+                        .padding()
+                        .background(buttonColor)
+                        .foregroundColor(.white)
+                        .cornerRadius(40)
                 }
             }
-            .alert(isPresented: $alert) {
+            .padding(10)
+            .navigationBarTitle("Voice Memos")
+            .alert(isPresented: $showAlert) {
                 Alert(
                     title: Text("Microphone Access"),
                     message: Text("This app requires access to your microphone to record audio. Enable access in Settings."),
                     primaryButton: .default(Text("Settings")) {
-                        UIApplication.shared.open(URL(string: UIApplication.openSettingsURLString)!, options: [:], completionHandler: nil)
+                        openSettings()
                     },
                     secondaryButton: .cancel()
                 )
             }
-//questo è il recording overlay
-            // Recording overlay
-            if isRecordingOverlayVisible {
-                ZStack {
-                    Color(UIColor.systemGray6)
-                        .frame(maxWidth: .infinity, maxHeight: .infinity)
-                        .edgesIgnoringSafeArea(.all)
+            .alert(isPresented: $showStopAlert) {
+                Alert(
+                    title: Text("Stop Recording"),
+                    message: Text("Do you want to stop the recording?"),
+                    primaryButton: .default(Text("Yes")) {
+                        stopRecording()
+                    },
+                    secondaryButton: .cancel()
+                )
+            }
+            .onAppear {
+                loadPreviousRecords()
+                requestRecordPermission()
+            }
+        }
+    }
+    
+    // RecordingDetailView per accettare il nuovo nome e il gestore di rinomina
+    struct RecordingDetailView: View {
+        var recordURL: URL
+        var index: Int
+        @Binding var recordings: [URL]
+        var onRename: () -> Void
 
-                    VStack(spacing: 20) {
-                        Text("Recording...")
-                            .font(.headline)
-                            .padding()
+        @State private var newName: String // Variabile temporanea per la modifica
+        @State private var isEditing = false
 
-                        if let startTime = recordingStartTime {
-                            Text("\(formattedRecordingTime(from: startTime))")
-                                .foregroundColor(.red)
-                                .font(.title)
-                        }
+        init(recordURL: URL, index: Int, recordings: Binding<[URL]>, onRename: @escaping () -> Void) {
+            self.recordURL = recordURL
+            self.index = index
+            self._recordings = recordings
+            self.onRename = onRename
+            self._newName = State(initialValue: recordURL.lastPathComponent)
+        }
 
-                        Button("Stop Recording") {
-                            startStopRecording()
-                            withAnimation {
-                                isRecordingOverlayVisible.toggle()
-                            }
-                        }
-                        .padding()
-                        .foregroundColor(.white)
-                        .background(Color.red)
-                        .cornerRadius(10)
-                    }
+        var body: some View {
+            VStack {
+                if isEditing {
+                    TextField("Enter a new name", text: $newName, onCommit: {
+                        guard !newName.isEmpty else { return }
+                        recordings[index] = recordURL.deletingLastPathComponent().appendingPathComponent(newName)
+                        onRename()
+                        isEditing = false
+                    })
                     .padding()
-                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+                    .textFieldStyle(RoundedBorderTextFieldStyle())
+                } else {
+                    Text("Recording Detail: \(recordings[index].lastPathComponent)")
+                        .navigationBarTitle("Recording Detail")
+                }
+
+                Button("Rename") {
+                    isEditing.toggle()
                 }
             }
+            .padding()
         }
     }
 
-    func formattedRecordingTime(from startTime: Date) -> String {
-        let elapsedTime = Date().timeIntervalSince(startTime)
-        let minutes = Int(elapsedTime / 60)
-        let seconds = Int(elapsedTime.truncatingRemainder(dividingBy: 60))
-        return String(format: "%02d:%02d", minutes, seconds)
-    }
-
-    func getAudios() {
-        do {
-            let url = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
-            let result = try FileManager.default.contentsOfDirectory(at: url, includingPropertiesForKeys: nil, options: .producesRelativePathURLs)
-
-            audios.removeAll()
-            for i in result {
-                audios.append(i)
-            }
-        } catch {
-            print("Error fetching audio files: \(error.localizedDescription)")
-        }
-    }
-
-    func startStopRecording() {
-        if record {
-            stopRecording()
+    func newName(forIndex index: Int) -> String {
+        if isEditingRecording(index: index) {
+            return newName
         } else {
+            return "Recording \(index + 1)"
+        }
+    }
+    
+    func isEditingRecording(index: Int) -> Bool {
+        return index < recordings.count && index == currentlyEditingIndex
+    }
+
+    func renameRecording(at index: Int, to newName: String) {
+        let recordingURL = recordings[index]
+        let newURL = getDirectory().appendingPathComponent("\(newName).m4a")
+
+        do {
+            try FileManager.default.moveItem(at: recordingURL, to: newURL)
+            recordings[index] = newURL
+            loadPreviousRecords()  // Carica nuovamente i record per aggiornare la vista
+        } catch {
+            print("Error renaming recording: \(error.localizedDescription)")
+        }
+    }
+    
+    // Funzione per eliminare una registrazione
+    func deleteRecording(at offsets: IndexSet) {
+        numberOfRecords -= offsets.count
+        for index in offsets {
+            let recordingURL = recordings[index]
+            do {
+                try FileManager.default.removeItem(at: recordingURL)
+                recordings.remove(at: index)
+            } catch {
+                print("Error deleting recording: \(error.localizedDescription)")
+            }
+        }
+        UserDefaults.standard.set(numberOfRecords, forKey: "myNumber")
+    }
+
+    func toggleRecording() {
+        if isRecording {
+            showStopAlert = true
+        } else {
+            // Assegna un nome predefinito quando inizi a registrare
+            newName = "Recording \(numberOfRecords + 1)"
             startRecording()
+            buttonColor = .red
         }
     }
 
+    // Funzione per avviare la registrazione
     func startRecording() {
         do {
-            let url = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
-                .appendingPathComponent("myRcd\(audios.count + 1).m4a")
+            let audioSession = AVAudioSession.sharedInstance()
+            try audioSession.setCategory(.playAndRecord, options: .defaultToSpeaker)
 
+            // Incrementa il numero di record e imposta il nome del file
+            numberOfRecords += 1
+            let filename = getDirectory().appendingPathComponent("\(numberOfRecords).m4a")
+
+            // Impostazioni per la registrazione audio
             let settings: [String: Any] = [
                 AVFormatIDKey: Int(kAudioFormatMPEG4AAC),
                 AVSampleRateKey: 12000,
@@ -163,50 +191,92 @@ struct ContentView: View {
                 AVEncoderAudioQualityKey: AVAudioQuality.high.rawValue
             ]
 
-            recorder = try AVAudioRecorder(url: url, settings: settings)
-            recorder.record()
-            record.toggle()
+            // Crea e avvia l'AVAudioRecorder
+            audioRecorder = try AVAudioRecorder(url: filename, settings: settings)
+            audioRecorder?.delegate = context
+            audioRecorder?.record()
+            isRecording = true
         } catch {
-            print("Recording setup error: \(error.localizedDescription)")
+            // Gestisci l'errore di registrazione
+            displayAlert(title: "Ups!", message: "Recording failed")
         }
     }
 
+    // Funzione per interrompere la registrazione
     func stopRecording() {
-        recorder.stop()
-        record.toggle()
-        getAudios()
+        guard isRecording else {
+            return
+        }
+
+        // Imposta lo stato di registrazione e il colore del bottone
+        isRecording = false
+        buttonColor = .blue
+
+        // Interrompi l'AVAudioRecorder e dealloca le risorse
+        audioRecorder?.stop()
+        audioRecorder?.delegate = nil
+        audioRecorder = nil
+
+        // Salva il numero di record e carica i record precedenti
+        UserDefaults.standard.set(numberOfRecords, forKey: "myNumber")
+        loadPreviousRecords()
     }
 
-    func deleteAudio(at offsets: IndexSet) {
-        do {
-            for index in offsets {
-                try FileManager.default.removeItem(at: audios[index])
+    // Funzione per caricare i record precedenti
+    func loadPreviousRecords() {
+        if let number = UserDefaults.standard.object(forKey: "myNumber") as? Int {
+            numberOfRecords = number
+            recordings = (1...number).map {
+                getDirectory().appendingPathComponent("\($0).m4a")
             }
-            getAudios()
-        } catch {
-            print("Error deleting audio: \(error.localizedDescription)")
         }
+    }
+
+    // Funzione per richiedere il permesso di registrazione
+    func requestRecordPermission() {
+        AVAudioApplication.requestRecordPermission() { hasPermission in
+            if !hasPermission {
+                showAlert = true
+            }
+        }
+    }
+
+    // Funzione per ottenere il percorso della directory documenti
+    func getDirectory() -> URL {
+        FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
+    }
+
+    // Funzione per aprire le impostazioni dell'app
+    func openSettings() {
+        UIApplication.shared.open(URL(string: UIApplication.openSettingsURLString)!, options: [:], completionHandler: nil)
+    }
+
+    // Funzione per visualizzare un alert
+    func displayAlert(title: String, message: String) {
+        showAlert = true
     }
 }
 
+// Anteprima della vista
 struct ContentView_Previews: PreviewProvider {
     static var previews: some View {
         ContentView()
     }
 }
 
-// Function to get a formatted date from the creation date of a file URL.
-func getFormattedDate(for url: URL) -> String {
-    do {
-        let attributes = try FileManager.default.attributesOfItem(atPath: url.path)
-        if let creationDate = attributes[.creationDate] as? Date {
-            let formatter = DateFormatter()
-            formatter.dateStyle = .short
-            formatter.timeStyle = .short
-            return formatter.string(from: creationDate)
+// Classe Coordinator per gestire gli eventi dell'AVAudioRecorderDelegate
+class Coordinator: NSObject, AVAudioRecorderDelegate {
+    func audioRecorderDidFinishRecording(_ recorder: AVAudioRecorder, successfully flag: Bool) {
+        // Gestisce la registrazione terminata
+        if !flag {
+            // Implementa eventuali logiche aggiuntive per una registrazione non riuscita
         }
-    } catch {
-        print("Error getting file attributes: \(error.localizedDescription)")
     }
-    return ""
+}
+
+// Estensione ContentView per ottenere un'istanza di Coordinator
+extension ContentView {
+    var context: Coordinator {
+        Coordinator()
+    }
 }
