@@ -7,147 +7,103 @@
 
 import SwiftUI
 import AVFoundation
+import Accelerate
 
-struct ContentView: View {
-    // Stati per gestire la registrazione e la visualizzazione degli alert
-    @State private var isRecording = false
-    @State private var numberOfRecords = 0
-    @State private var recordings: [URL] = []
-    @State private var showAlert = false
-    @State private var showStopAlert = false
-    @State private var audioRecorder: AVAudioRecorder?
-    @State private var buttonColor: Color = .blue
-    // Variabile di stato per gestire la modifica del nome del file
-    @State private var newName = ""
-    @State private var currentlyEditingIndex: Int?
+class AudioRecorderManager: NSObject, ObservableObject, AVAudioRecorderDelegate {
+    @Published var isRecording = false
+    @Published var numberOfRecords = 0
+    @Published var recordings: [URL] = []
+    @Published var showAlert = false
+    @Published var showStopAlert = false
+    @Published var audioRecorder: AVAudioRecorder?
+    @Published var buttonColor: Color = .blue
+    @Published var dominantFrequencies: [Double] = []
 
-    var body: some View {
-        NavigationView {
-            VStack {
-                List {
-                    ForEach(0..<numberOfRecords, id: \.self) { index in
-                        if index < recordings.count {
-                            NavigationLink(
-                                destination: RecordingDetailView(recordURL: recordings[index], index: index, recordings: $recordings, onRename: {
-                                    loadPreviousRecords()  // Aggiorna la lista dei record
-                                }),
-                                label: {
-                                    Text("\(newName(forIndex: index))")
-                                }
-                            )
-                        }
-                    }
-                    .onDelete(perform: deleteRecording)
-                }
-                .padding(10)
+    private var coordinator: Coordinator?
+    private var frequencyAnalysisTimer: Timer?
 
-                Button(action: {
-                    toggleRecording()
-                }) {
-                    Text(isRecording ? "Stop Recording" : "Start Recording")
-                        .padding()
-                        .background(buttonColor)
-                        .foregroundColor(.white)
-                        .cornerRadius(40)
-                }
-            }
-            .padding(10)
-            .navigationBarTitle("Voice Memos")
-            .alert(isPresented: $showAlert) {
-                Alert(
-                    title: Text("Microphone Access"),
-                    message: Text("This app requires access to your microphone to record audio. Enable access in Settings."),
-                    primaryButton: .default(Text("Settings")) {
-                        openSettings()
-                    },
-                    secondaryButton: .cancel()
-                )
-            }
-            .alert(isPresented: $showStopAlert) {
-                Alert(
-                    title: Text("Stop Recording"),
-                    message: Text("Do you want to stop the recording?"),
-                    primaryButton: .default(Text("Yes")) {
-                        stopRecording()
-                    },
-                    secondaryButton: .cancel()
-                )
-            }
-            .onAppear {
-                loadPreviousRecords()
-                requestRecordPermission()
+    override init() {
+        super.init()
+        loadPreviousRecords()
+        requestRecordPermission()
+
+        // Inizializza il timer per il campionamento periodico
+        frequencyAnalysisTimer = Timer.scheduledTimer(withTimeInterval: 1.0, repeats: true) { [weak self] _ in
+            // Esegui l'analisi della frequenza sul file audio corrente
+            if let lastRecordingURL = self?.recordings.last {
+                self?.findDominantFrequencyInAudioFile(at: lastRecordingURL, sampleRate: 44100.0)
             }
         }
+    }
+
+    deinit {
+        // Ferma il timer quando l'istanza viene deallocata
+        frequencyAnalysisTimer?.invalidate()
     }
     
-    // RecordingDetailView per accettare il nuovo nome e il gestore di rinomina
-    struct RecordingDetailView: View {
-        var recordURL: URL
-        var index: Int
-        @Binding var recordings: [URL]
-        var onRename: () -> Void
-
-        @State private var newName: String // Variabile temporanea per la modifica
-        @State private var isEditing = false
-
-        init(recordURL: URL, index: Int, recordings: Binding<[URL]>, onRename: @escaping () -> Void) {
-            self.recordURL = recordURL
-            self.index = index
-            self._recordings = recordings
-            self.onRename = onRename
-            self._newName = State(initialValue: recordURL.lastPathComponent)
-        }
-
-        var body: some View {
-            VStack {
-                if isEditing {
-                    TextField("Enter a new name", text: $newName, onCommit: {
-                        guard !newName.isEmpty else { return }
-                        recordings[index] = recordURL.deletingLastPathComponent().appendingPathComponent(newName)
-                        onRename()
-                        isEditing = false
-                    })
-                    .padding()
-                    .textFieldStyle(RoundedBorderTextFieldStyle())
-                } else {
-                    Text("Recording Detail: \(recordings[index].lastPathComponent)")
-                        .navigationBarTitle("Recording Detail")
-                }
-
-                Button("Rename") {
-                    isEditing.toggle()
-                }
-            }
-            .padding()
-        }
-    }
-
-    func newName(forIndex index: Int) -> String {
-        if isEditingRecording(index: index) {
-            return newName
-        } else {
-            return "Recording \(index + 1)"
-        }
-    }
     
-    func isEditingRecording(index: Int) -> Bool {
-        return index < recordings.count && index == currentlyEditingIndex
+    private func findAverageFrequencyInSineWave(_ signal: [Double], sampleRate: Double, duration: Double) -> Double? {
+        guard !signal.isEmpty else {
+            return nil // Non ci sono dati nel segnale
+        }
+
+        // Calcola il numero totale di campioni nel periodo di tempo desiderato
+        let numberOfSamplesInDuration = Int(duration * sampleRate)
+
+        // Assicurati che il numero di campioni sia inferiore o uguale alla lunghezza del segnale
+        let numberOfSamplesToUse = min(numberOfSamplesInDuration, signal.count)
+
+        // Seleziona i primi numberOfSamplesToUse campioni
+        let selectedSamples = Array(signal.prefix(numberOfSamplesToUse))
+
+        // Calcola la media delle frequenze nel periodo di tempo desiderato
+        let sumOfFrequencies = selectedSamples.reduce(0, +) //Somma di tutte le frequenze
+        let averageFrequency = sumOfFrequencies / Double(selectedSamples.count)
+
+        return averageFrequency
     }
 
-    func renameRecording(at index: Int, to newName: String) {
-        let recordingURL = recordings[index]
-        let newURL = getDirectory().appendingPathComponent("\(newName).m4a")
-
+    // Function to find dominant frequency in an audio file
+    func findDominantFrequencyInAudioFile(at url: URL, sampleRate: Double) {
         do {
-            try FileManager.default.moveItem(at: recordingURL, to: newURL)
-            recordings[index] = newURL
-            loadPreviousRecords()  // Carica nuovamente i record per aggiornare la vista
+            // Load audio file
+            let audioFile = try AVAudioFile(forReading: url)
+            let audioFormat = audioFile.processingFormat
+            let audioFrameCount = UInt32(audioFile.length)
+            let audioBuffer = AVAudioPCMBuffer(pcmFormat: audioFormat, frameCapacity: audioFrameCount)!
+
+            try audioFile.read(into: audioBuffer)
+
+            // Convert audio buffer to an array of Double
+            let samples = Array(UnsafeBufferPointer(start: audioBuffer.floatChannelData?[0], count: Int(audioBuffer.frameLength)))
+                .map { Double($0) }
+
+            // Perform frequency analysis
+            if let averageFrequency = findAverageFrequencyInSineWave(samples, sampleRate: sampleRate, duration: 1.0) {
+                // Ora puoi utilizzare averageFrequency per ottenere il feedback aptico
+                // Esempio: confronta averageFrequency con una soglia e fornisci il feedback aptico di conseguenza
+                let threshold: Double = 1000 // Imposta la tua soglia desiderata
+
+                if averageFrequency > threshold {
+                    // Fornisci feedback aptico per il cambio di frequenza
+                    provideHapticFeedback()
+                }
+
+                // Aggiorna la proprietà pubblicata
+                self.dominantFrequencies = [averageFrequency]
+            }
         } catch {
-            print("Error renaming recording: \(error.localizedDescription)")
+            print("Error loading audio file: \(error.localizedDescription)")
         }
     }
     
-    // Funzione per eliminare una registrazione
+    // Funzione di esempio per fornire il feedback aptico
+    func provideHapticFeedback() {
+        // Implementa la logica per fornire il feedback aptico qui
+        // Ad esempio, utilizza Core Haptics, UIKit, o un'altra libreria appropriata
+    }
+
+    // Function to delete a recording
     func deleteRecording(at offsets: IndexSet) {
         numberOfRecords -= offsets.count
         for index in offsets {
@@ -162,28 +118,28 @@ struct ContentView: View {
         UserDefaults.standard.set(numberOfRecords, forKey: "myNumber")
     }
 
+    // Function to toggle recording
     func toggleRecording() {
         if isRecording {
             showStopAlert = true
         } else {
-            // Assegna un nome predefinito quando inizi a registrare
-            newName = "Recording \(numberOfRecords + 1)"
+            // Assign a default name when starting to record
             startRecording()
             buttonColor = .red
         }
     }
 
-    // Funzione per avviare la registrazione
+    // Function to start recording
     func startRecording() {
         do {
             let audioSession = AVAudioSession.sharedInstance()
             try audioSession.setCategory(.playAndRecord, options: .defaultToSpeaker)
 
-            // Incrementa il numero di record e imposta il nome del file
+            // Increment the record number and set the file name
             numberOfRecords += 1
             let filename = getDirectory().appendingPathComponent("\(numberOfRecords).m4a")
 
-            // Impostazioni per la registrazione audio
+            // Settings for audio recording
             let settings: [String: Any] = [
                 AVFormatIDKey: Int(kAudioFormatMPEG4AAC),
                 AVSampleRateKey: 12000,
@@ -191,38 +147,40 @@ struct ContentView: View {
                 AVEncoderAudioQualityKey: AVAudioQuality.high.rawValue
             ]
 
-            // Crea e avvia l'AVAudioRecorder
+            // Create an instance of Coordinator and assign it as the delegate
+            coordinator = Coordinator()
             audioRecorder = try AVAudioRecorder(url: filename, settings: settings)
-            audioRecorder?.delegate = context
+            audioRecorder?.delegate = coordinator
             audioRecorder?.record()
             isRecording = true
         } catch {
-            // Gestisci l'errore di registrazione
+            // Handle recording error
             displayAlert(title: "Ups!", message: "Recording failed")
         }
     }
 
-    // Funzione per interrompere la registrazione
+
+    // Function to stop recording
     func stopRecording() {
         guard isRecording else {
             return
         }
 
-        // Imposta lo stato di registrazione e il colore del bottone
+        // Set recording state and button color
         isRecording = false
         buttonColor = .blue
 
-        // Interrompi l'AVAudioRecorder e dealloca le risorse
+        // Stop AVAudioRecorder and deallocate resources
         audioRecorder?.stop()
         audioRecorder?.delegate = nil
         audioRecorder = nil
 
-        // Salva il numero di record e carica i record precedenti
+        // Save the record number and load previous records
         UserDefaults.standard.set(numberOfRecords, forKey: "myNumber")
         loadPreviousRecords()
     }
 
-    // Funzione per caricare i record precedenti
+    // Function to load previous records
     func loadPreviousRecords() {
         if let number = UserDefaults.standard.object(forKey: "myNumber") as? Int {
             numberOfRecords = number
@@ -232,51 +190,162 @@ struct ContentView: View {
         }
     }
 
-    // Funzione per richiedere il permesso di registrazione
+    // Function to request recording permission
     func requestRecordPermission() {
         AVAudioApplication.requestRecordPermission() { hasPermission in
             if !hasPermission {
-                showAlert = true
+                self.showAlert = true
             }
         }
     }
 
-    // Funzione per ottenere il percorso della directory documenti
+    // Function to get the document directory path
     func getDirectory() -> URL {
         FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
     }
 
-    // Funzione per aprire le impostazioni dell'app
+    // Function to open app settings
     func openSettings() {
         UIApplication.shared.open(URL(string: UIApplication.openSettingsURLString)!, options: [:], completionHandler: nil)
     }
 
-    // Funzione per visualizzare un alert
+    // Function to display an alert
     func displayAlert(title: String, message: String) {
         showAlert = true
     }
 }
 
-// Anteprima della vista
+// ContentView preview
 struct ContentView_Previews: PreviewProvider {
     static var previews: some View {
         ContentView()
     }
 }
 
-// Classe Coordinator per gestire gli eventi dell'AVAudioRecorderDelegate
+// Coordinator class to handle AVAudioRecorderDelegate events
 class Coordinator: NSObject, AVAudioRecorderDelegate {
     func audioRecorderDidFinishRecording(_ recorder: AVAudioRecorder, successfully flag: Bool) {
-        // Gestisce la registrazione terminata
+        // Handle recording finished
         if !flag {
-            // Implementa eventuali logiche aggiuntive per una registrazione non riuscita
+            // Implement any additional logic for unsuccessful recording
+        }
+    }
+}
+struct ContentView: View {
+    @StateObject private var audioRecorderManager = AudioRecorderManager()
+
+    var body: some View {
+        NavigationView {
+            VStack {
+                List {
+                    ForEach(0..<audioRecorderManager.numberOfRecords, id: \.self) { index in
+                        if !audioRecorderManager.recordings.isEmpty, audioRecorderManager.recordings.indices.contains(index) {
+                            let recordingURL = audioRecorderManager.recordings[index]
+
+                            NavigationLink(
+                                destination: RecordingDetailView(recordURL: recordingURL, index: index, audioRecorderManager: audioRecorderManager, newName: ""),
+                                label: {
+                                    Text("Recording \(index + 1)")
+                                }
+                            )
+                        }
+                    }
+                    .onDelete { indices in
+                        indices.forEach { index in
+                            audioRecorderManager.deleteRecording(at: IndexSet(integer: index))
+                        }
+                    }
+                }
+                .padding(10)
+
+                Button(action: {
+                    audioRecorderManager.toggleRecording()
+                }) {
+                    Text(audioRecorderManager.isRecording ? "Stop Recording" : "Start Recording")
+                        .padding()
+                        .background(audioRecorderManager.buttonColor)
+                        .foregroundColor(.white)
+                        .cornerRadius(40)
+                }
+
+                // Display dominant frequencies
+                Text("Dominant Frequencies: \(audioRecorderManager.dominantFrequencies.map { String($0) }.joined(separator: ", "))")
+                    .padding()
+            }
+            .padding(10)
+            .navigationBarTitle("Voice Memos")
+            .alert(isPresented: $audioRecorderManager.showAlert) {
+                Alert(
+                    title: Text("Microphone Access"),
+                    message: Text("This app requires access to your microphone to record audio. Enable access in Settings."),
+                    primaryButton: .default(Text("Settings")) {
+                        audioRecorderManager.openSettings()
+                    },
+                    secondaryButton: .cancel()
+                )
+            }
+            .alert(isPresented: $audioRecorderManager.showStopAlert) {
+                Alert(
+                    title: Text("Stop Recording"),
+                    message: Text("Do you want to stop the recording?"),
+                    primaryButton: .default(Text("Yes")) {
+                        audioRecorderManager.stopRecording()
+                    },
+                    secondaryButton: .cancel()
+                )
+            }
+            .onAppear {
+                audioRecorderManager.loadPreviousRecords()
+                audioRecorderManager.requestRecordPermission()
+            }
         }
     }
 }
 
-// Estensione ContentView per ottenere un'istanza di Coordinator
-extension ContentView {
-    var context: Coordinator {
-        Coordinator()
+// RecordingDetailView to accept the new name and rename handler
+struct RecordingDetailView: View {
+    var recordURL: URL
+    var index: Int
+    @ObservedObject var audioRecorderManager: AudioRecorderManager
+    @State private var newName: String // Temporary variable for editing
+
+    @State private var isEditing = false
+    
+    public init(recordURL: URL, index: Int, audioRecorderManager: AudioRecorderManager, newName: String) {
+            self.recordURL = recordURL
+            self.index = index
+            self.audioRecorderManager = audioRecorderManager
+            self._newName = State(initialValue: newName)
+        }
+
+    var body: some View {
+        VStack {
+            if isEditing {
+                TextField("Enter a new name", text: $newName, onCommit: {
+                    guard !newName.isEmpty else { return }
+                    audioRecorderManager.recordings[index] = recordURL.deletingLastPathComponent().appendingPathComponent(newName)
+                    audioRecorderManager.loadPreviousRecords()  // Update the record list
+                    isEditing = false
+                })
+                .padding()
+                .textFieldStyle(RoundedBorderTextFieldStyle())
+            } else {
+                Text("Recording Detail: \(audioRecorderManager.recordings[index].lastPathComponent)")
+                    .navigationBarTitle("Recording Detail")
+            }
+
+            // Button to analyze frequency for the current recording
+            Button(action: {
+                audioRecorderManager.findDominantFrequencyInAudioFile(at: recordURL, sampleRate: 44100.0)
+            }) {
+                Text("Analyze Frequency")
+                    .padding()
+                    .background(Color.green)
+                    .foregroundColor(.white)
+                    .cornerRadius(40)
+            }
+        }
+        .padding()
     }
 }
+
