@@ -8,6 +8,7 @@
 import SwiftUI
 import AVFoundation
 import Accelerate
+import CoreHaptics
 
 class AudioRecorderManager: NSObject, ObservableObject, AVAudioRecorderDelegate {
     @Published var isRecording = false
@@ -27,57 +28,33 @@ class AudioRecorderManager: NSObject, ObservableObject, AVAudioRecorderDelegate 
         loadPreviousRecords()
         requestRecordPermission()
 
-        // Inizializza il timer per il campionamento periodico
-        frequencyAnalysisTimer = Timer.scheduledTimer(withTimeInterval: 1.0, repeats: true) { [weak self] _ in
-            // Esegui l'analisi della frequenza sul file audio corrente
-            if let lastRecordingURL = self?.recordings.last {
-                self?.findDominantFrequencyInAudioFile(at: lastRecordingURL, sampleRate: 44100.0)
-            }
-        }
+        
     }
 
-    deinit {
-        // Ferma il timer quando l'istanza viene deallocata
-        frequencyAnalysisTimer?.invalidate()
-    }
-    
-    
-    private func findAverageFrequencyInSineWave(_ signal: [Float], sampleRate: Double, duration: Double) -> Double? {
-        guard !signal.isEmpty else {
-            return nil // Non ci sono dati nel segnale
-        }
+    func findAverageFrequencyInSineWave(_ samples: [Float], sampleRate: Double, duration: Double) -> Double? {
+        let segmentDuration = 0.5  // Durata del segmento in secondi
+        let segmentSamples = Int(sampleRate * segmentDuration)
 
-        let bufferSize = signal.count
-        let audioData = signal
+        // Estrai il segmento corrente
+        let segment = Array(samples.prefix(segmentSamples))
 
-        var real = [Float](repeating: 0.0, count: bufferSize)
-        var imag = [Float](repeating: 0.0, count: bufferSize)
-        var tempComplex = [DSPComplex](repeating: DSPComplex(), count: bufferSize / 2)
+        // Calcola l'autocorrelazione
+        var autocorrelation = [Float](repeating: 0.0, count: segmentSamples)
+        vDSP_conv(segment, 1, segment.reversed(), 1, &autocorrelation, 1, vDSP_Length(segmentSamples), vDSP_Length(segmentSamples))
 
-        for i in 0..<bufferSize / 2 {
-            tempComplex[i].real = audioData[i * 2]
-            tempComplex[i].imag = audioData[i * 2 + 1]
-        }
+        // Trova il picco nella funzione di autocorrelazione
+        var peakIndex: vDSP_Length = 0
+        var peakValue: Float = 0.0
+        vDSP_maxvi(autocorrelation, 1, &peakValue, &peakIndex, vDSP_Length(autocorrelation.count))
 
-        var output = DSPSplitComplex(realp: &real, imagp: &imag)
-        vDSP_ctoz(tempComplex, 2, &output, 1, vDSP_Length(bufferSize / 2))
+        // Calcola la frequenza corrispondente
+        let fundamentalFrequency = Double(sampleRate) / Double(peakIndex)
 
-        let fftSetup = vDSP_create_fftsetup(vDSP_Length(log2(Float(bufferSize))), FFTRadix(kFFTRadix2))
-        vDSP_fft_zrip(fftSetup!, &output, 1, vDSP_Length(log2(Float(bufferSize))), FFTDirection(FFT_FORWARD))
-
-        var magnitude = [Float](repeating: 0.0, count: bufferSize / 2)
-        vDSP_zvmags(&output, 1, &magnitude, 1, vDSP_Length(bufferSize / 2))
-
-        let mainHarmonicFrequency = findMainHarmonicFrequency(magnitude, sampleRate: sampleRate, bufferSize: bufferSize)
-        print("Main harmonic frequency: \(mainHarmonicFrequency) Hz")
-
-        vDSP_destroy_fftsetup(fftSetup)
-
-        return Double(mainHarmonicFrequency)
+        return fundamentalFrequency.isFinite ? fundamentalFrequency : nil
     }
 
-    // Function to find dominant frequency in an audio file
-    func findDominantFrequencyInAudioFile(at url: URL, sampleRate: Double) {
+
+    func findDominantFrequencyInAudioFile(at url: URL, sampleRate: Double) -> [Double] {
         do {
             // Load audio file
             let audioFile = try AVAudioFile(forReading: url)
@@ -87,33 +64,38 @@ class AudioRecorderManager: NSObject, ObservableObject, AVAudioRecorderDelegate 
 
             try audioFile.read(into: audioBuffer)
 
-            // Convert audio buffer to an array of Float
-            let samples = Array(UnsafeBufferPointer(start: audioBuffer.floatChannelData?[0], count: Int(audioBuffer.frameLength)))
+            let segmentDuration: Double = 0.5 // Durata del segmento in secondi
+            let segmentSamples = Int(segmentDuration * sampleRate)
 
-            // Perform frequency analysis
-            if let averageFrequency = findAverageFrequencyInSineWave(samples, sampleRate: sampleRate, duration: 1.0) {
-                let threshold: Double = 1000 // Imposta la tua soglia desiderata
+            var currentIndex = 0
+            var dominantFrequencies: [Double] = [] // Local variable
 
-                if averageFrequency > threshold {
-                    // Fornisci feedback aptico per il cambio di frequenza
-                    provideHapticFeedback()
+            while currentIndex + segmentSamples <= Int(audioBuffer.frameLength) {
+                // Estrai il segmento corrente
+                let segment = Array(UnsafeBufferPointer(start: audioBuffer.floatChannelData?[0].advanced(by: currentIndex), count: segmentSamples))
+
+                // Performi l'analisi della frequenza per il segmento
+                if let averageFrequency = findAverageFrequencyInSineWave(segment, sampleRate: sampleRate, duration: segmentDuration) {
+                    dominantFrequencies.append(averageFrequency)
                 }
 
-                // Aggiorna la proprietà pubblicata
-                self.dominantFrequencies = [averageFrequency]
+                // Muovi l'indice al prossimo segmento
+                currentIndex += segmentSamples
             }
+
+            // Print debug information
+            print("Dominant Frequencies: \(dominantFrequencies)")
+
+            // Restituisci l'array di frequenze dominanti trovate
+            return dominantFrequencies
+
         } catch {
             print("Error loading audio file: \(error.localizedDescription)")
+            return []
         }
     }
 
     
-    // Funzione di esempio per fornire il feedback aptico
-    func provideHapticFeedback() {
-        // Implementa la logica per fornire il feedback aptico qui
-        // Ad esempio, utilizza Core Haptics, UIKit, o un'altra libreria appropriata
-    }
-
     // Function to delete a recording
     func deleteRecording(at offsets: IndexSet) {
         numberOfRecords -= offsets.count
@@ -126,7 +108,10 @@ class AudioRecorderManager: NSObject, ObservableObject, AVAudioRecorderDelegate 
                 print("Error deleting recording: \(error.localizedDescription)")
             }
         }
+        
+        // Aggiorna l'array dopo la cancellazione
         UserDefaults.standard.set(numberOfRecords, forKey: "myNumber")
+        loadPreviousRecords()
     }
 
     // Function to toggle recording
@@ -167,6 +152,7 @@ class AudioRecorderManager: NSObject, ObservableObject, AVAudioRecorderDelegate 
         } catch {
             // Handle recording error
             displayAlert(title: "Ups!", message: "Recording failed")
+            print("Error starting recording: \(error.localizedDescription)")
         }
     }
 
@@ -177,6 +163,10 @@ class AudioRecorderManager: NSObject, ObservableObject, AVAudioRecorderDelegate 
             return
         }
 
+        // Save the record number and load previous records
+        UserDefaults.standard.set(numberOfRecords, forKey: "myNumber")
+        loadPreviousRecords()
+
         // Set recording state and button color
         isRecording = false
         buttonColor = .blue
@@ -185,15 +175,11 @@ class AudioRecorderManager: NSObject, ObservableObject, AVAudioRecorderDelegate 
         audioRecorder?.stop()
         audioRecorder?.delegate = nil
         audioRecorder = nil
-
-        // Save the record number and load previous records
-        UserDefaults.standard.set(numberOfRecords, forKey: "myNumber")
-        loadPreviousRecords()
     }
-
+    
     // Function to load previous records
     func loadPreviousRecords() {
-        if let number = UserDefaults.standard.object(forKey: "myNumber") as? Int {
+        if let number = UserDefaults.standard.object(forKey: "myNumber") as? Int, number > 0 {
             numberOfRecords = number
             recordings = (1...number).map {
                 getDirectory().appendingPathComponent("\($0).m4a")
@@ -249,18 +235,17 @@ struct ContentView: View {
         NavigationView {
             VStack {
                 List {
-                    ForEach(0..<audioRecorderManager.numberOfRecords, id: \.self) { index in
-                        if !audioRecorderManager.recordings.isEmpty, audioRecorderManager.recordings.indices.contains(index) {
-                            let recordingURL = audioRecorderManager.recordings[index]
+                    ForEach(audioRecorderManager.recordings.indices, id: \.self) { index in
+                        let recordingURL = audioRecorderManager.recordings[index]
 
-                            NavigationLink(
-                                destination: RecordingDetailView(recordURL: recordingURL, index: index, audioRecorderManager: audioRecorderManager, newName: ""),
-                                label: {
-                                    Text("Recording \(index + 1)")
-                                }
-                            )
-                        }
+                        NavigationLink(
+                            destination: RecordingDetailView(recordURL: recordingURL, index: index, audioRecorderManager: audioRecorderManager, newName: ""),
+                            label: {
+                                Text("Recording \(index + 1)")
+                            }
+                        )
                     }
+
                     .onDelete { indices in
                         indices.forEach { index in
                             audioRecorderManager.deleteRecording(at: IndexSet(integer: index))
@@ -278,10 +263,6 @@ struct ContentView: View {
                         .foregroundColor(.white)
                         .cornerRadius(40)
                 }
-
-                // Display dominant frequencies
-                Text("Dominant Frequencies: \(audioRecorderManager.dominantFrequencies.map { String($0) }.joined(separator: ", "))")
-                    .padding()
             }
             .padding(10)
             .navigationBarTitle("Voice Memos")
@@ -313,16 +294,6 @@ struct ContentView: View {
     }
 }
 
-private func findMainHarmonicFrequency(_ magnitude: [Float], sampleRate: Double, bufferSize: Int) -> Float {
-    guard let maxIndex = magnitude.indices.max(by: { magnitude[$0] < magnitude[$1] }) else {
-        return 0.0
-    }
-
-    let mainHarmonicFrequency = Float(maxIndex) * Float(sampleRate) / Float(bufferSize)
-    return mainHarmonicFrequency
-}
-
-// RecordingDetailView to accept the new name and rename handler
 struct RecordingDetailView: View {
     var recordURL: URL
     var index: Int
@@ -332,11 +303,11 @@ struct RecordingDetailView: View {
     @State private var isEditing = false
     
     public init(recordURL: URL, index: Int, audioRecorderManager: AudioRecorderManager, newName: String) {
-            self.recordURL = recordURL
-            self.index = index
-            self.audioRecorderManager = audioRecorderManager
-            self._newName = State(initialValue: newName)
-        }
+        self.recordURL = recordURL
+        self.index = index
+        self.audioRecorderManager = audioRecorderManager
+        self._newName = State(initialValue: newName)
+    }
 
     var body: some View {
         VStack {
@@ -350,22 +321,38 @@ struct RecordingDetailView: View {
                 .padding()
                 .textFieldStyle(RoundedBorderTextFieldStyle())
             } else {
-                Text("Recording Detail: \(audioRecorderManager.recordings[index].lastPathComponent)")
-                    .navigationBarTitle("Recording Detail")
-            }
+                if let recordingURL = audioRecorderManager.recordings[safe: index] {
+                    Text("Recording Detail: \(recordingURL.lastPathComponent)")
+                        .navigationBarTitle("Recording Detail")
+                }
 
-            // Button to analyze frequency for the current recording
-            Button(action: {
-                audioRecorderManager.findDominantFrequencyInAudioFile(at: recordURL, sampleRate: 44100.0)
-            }) {
-                Text("Analyze Frequency")
-                    .padding()
-                    .background(Color.green)
-                    .foregroundColor(.white)
-                    .cornerRadius(40)
+                Button(action: {
+                    if let recordingURL = audioRecorderManager.recordings[safe: index], FileManager.default.fileExists(atPath: recordingURL.path) {
+                        let sampleRate = 12000.0
+
+                        // Use a local variable for dominant frequencies
+                        let dominantFrequencies = audioRecorderManager.findDominantFrequencyInAudioFile(at: recordingURL, sampleRate: sampleRate)
+
+                        // Stampa l'array di frequenze dominanti
+                        print("Dominant Frequencies: \(dominantFrequencies)")
+                    } else {
+                        print("Recording does not exist")
+                    }
+                }) {
+                    Text("Analyze Frequency")
+                        .padding()
+                        .background(Color.green)
+                        .foregroundColor(.white)
+                        .cornerRadius(40)
+                }
             }
         }
         .padding()
     }
 }
-
+// Estendi Collection per aggiungere l'accesso sicuro all'array
+extension Collection {
+    subscript(safe index: Index) -> Element? {
+        indices.contains(index) ? self[index] : nil
+    }
+}
