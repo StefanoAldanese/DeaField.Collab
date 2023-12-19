@@ -42,25 +42,38 @@ class AudioRecorderManager: NSObject, ObservableObject, AVAudioRecorderDelegate 
     }
     
     
-    private func findAverageFrequencyInSineWave(_ signal: [Double], sampleRate: Double, duration: Double) -> Double? {
+    private func findAverageFrequencyInSineWave(_ signal: [Float], sampleRate: Double, duration: Double) -> Double? {
         guard !signal.isEmpty else {
             return nil // Non ci sono dati nel segnale
         }
 
-        // Calcola il numero totale di campioni nel periodo di tempo desiderato
-        let numberOfSamplesInDuration = Int(duration * sampleRate)
+        let bufferSize = signal.count
+        let audioData = signal
 
-        // Assicurati che il numero di campioni sia inferiore o uguale alla lunghezza del segnale
-        let numberOfSamplesToUse = min(numberOfSamplesInDuration, signal.count)
+        var real = [Float](repeating: 0.0, count: bufferSize)
+        var imag = [Float](repeating: 0.0, count: bufferSize)
+        var tempComplex = [DSPComplex](repeating: DSPComplex(), count: bufferSize / 2)
 
-        // Seleziona i primi numberOfSamplesToUse campioni
-        let selectedSamples = Array(signal.prefix(numberOfSamplesToUse))
+        for i in 0..<bufferSize / 2 {
+            tempComplex[i].real = audioData[i * 2]
+            tempComplex[i].imag = audioData[i * 2 + 1]
+        }
 
-        // Calcola la media delle frequenze nel periodo di tempo desiderato
-        let sumOfFrequencies = selectedSamples.reduce(0, +) //Somma di tutte le frequenze
-        let averageFrequency = sumOfFrequencies / Double(selectedSamples.count)
+        var output = DSPSplitComplex(realp: &real, imagp: &imag)
+        vDSP_ctoz(tempComplex, 2, &output, 1, vDSP_Length(bufferSize / 2))
 
-        return averageFrequency
+        let fftSetup = vDSP_create_fftsetup(vDSP_Length(log2(Float(bufferSize))), FFTRadix(kFFTRadix2))
+        vDSP_fft_zrip(fftSetup!, &output, 1, vDSP_Length(log2(Float(bufferSize))), FFTDirection(FFT_FORWARD))
+
+        var magnitude = [Float](repeating: 0.0, count: bufferSize / 2)
+        vDSP_zvmags(&output, 1, &magnitude, 1, vDSP_Length(bufferSize / 2))
+
+        let mainHarmonicFrequency = findMainHarmonicFrequency(magnitude, sampleRate: sampleRate, bufferSize: bufferSize)
+        print("Main harmonic frequency: \(mainHarmonicFrequency) Hz")
+
+        vDSP_destroy_fftsetup(fftSetup)
+
+        return Double(mainHarmonicFrequency)
     }
 
     // Function to find dominant frequency in an audio file
@@ -74,14 +87,11 @@ class AudioRecorderManager: NSObject, ObservableObject, AVAudioRecorderDelegate 
 
             try audioFile.read(into: audioBuffer)
 
-            // Convert audio buffer to an array of Double
+            // Convert audio buffer to an array of Float
             let samples = Array(UnsafeBufferPointer(start: audioBuffer.floatChannelData?[0], count: Int(audioBuffer.frameLength)))
-                .map { Double($0) }
 
             // Perform frequency analysis
             if let averageFrequency = findAverageFrequencyInSineWave(samples, sampleRate: sampleRate, duration: 1.0) {
-                // Ora puoi utilizzare averageFrequency per ottenere il feedback aptico
-                // Esempio: confronta averageFrequency con una soglia e fornisci il feedback aptico di conseguenza
                 let threshold: Double = 1000 // Imposta la tua soglia desiderata
 
                 if averageFrequency > threshold {
@@ -96,6 +106,7 @@ class AudioRecorderManager: NSObject, ObservableObject, AVAudioRecorderDelegate 
             print("Error loading audio file: \(error.localizedDescription)")
         }
     }
+
     
     // Funzione di esempio per fornire il feedback aptico
     func provideHapticFeedback() {
@@ -300,6 +311,15 @@ struct ContentView: View {
             }
         }
     }
+}
+
+private func findMainHarmonicFrequency(_ magnitude: [Float], sampleRate: Double, bufferSize: Int) -> Float {
+    guard let maxIndex = magnitude.indices.max(by: { magnitude[$0] < magnitude[$1] }) else {
+        return 0.0
+    }
+
+    let mainHarmonicFrequency = Float(maxIndex) * Float(sampleRate) / Float(bufferSize)
+    return mainHarmonicFrequency
 }
 
 // RecordingDetailView to accept the new name and rename handler

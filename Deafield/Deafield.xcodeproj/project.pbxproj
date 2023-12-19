@@ -7,8 +7,6 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		3B527C862B2DF5EE00F366F2 /* AudioKit in Frameworks */ = {isa = PBXBuildFile; productRef = 3B527C852B2DF5EE00F366F2 /* AudioKit */; };
-		3B61D7E92B318EAF00FD5A82 /* AudioKit in Frameworks */ = {isa = PBXBuildFile; productRef = 3B61D7E82B318EAF00FD5A82 /* AudioKit */; };
 		3B7C74912B2DB7B4009D0435 /* DeafieldApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B7C74902B2DB7B4009D0435 /* DeafieldApp.swift */; };
 		3B7C74932B2DB7B4009D0435 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B7C74922B2DB7B4009D0435 /* ContentView.swift */; };
 		3B7C74952B2DB7B5009D0435 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 3B7C74942B2DB7B5009D0435 /* Assets.xcassets */; };
@@ -46,6 +44,7 @@
 		3B7C74A72B2DB7B5009D0435 /* DeafieldUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = DeafieldUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		3B7C74AB2B2DB7B5009D0435 /* DeafieldUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeafieldUITests.swift; sourceTree = "<group>"; };
 		3B7C74AD2B2DB7B5009D0435 /* DeafieldUITestsLaunchTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeafieldUITestsLaunchTests.swift; sourceTree = "<group>"; };
+		7B5E35212B3191F00049A4DC /* AudioKit-main */ = {isa = PBXFileReference; lastKnownFileType = wrapper; name = "AudioKit-main"; path = "../AudioKit-main"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -53,8 +52,6 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				3B61D7E92B318EAF00FD5A82 /* AudioKit in Frameworks */,
-				3B527C862B2DF5EE00F366F2 /* AudioKit in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -82,6 +79,7 @@
 				3B7C74A02B2DB7B5009D0435 /* DeafieldTests */,
 				3B7C74AA2B2DB7B5009D0435 /* DeafieldUITests */,
 				3B7C748E2B2DB7B4009D0435 /* Products */,
+				7B5E35202B3191F00049A4DC /* Frameworks */,
 			);
 			sourceTree = "<group>";
 		};
@@ -131,6 +129,14 @@
 			path = DeafieldUITests;
 			sourceTree = "<group>";
 		};
+		7B5E35202B3191F00049A4DC /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				7B5E35212B3191F00049A4DC /* AudioKit-main */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
@@ -148,8 +154,6 @@
 			);
 			name = Deafield;
 			packageProductDependencies = (
-				3B527C852B2DF5EE00F366F2 /* AudioKit */,
-				3B61D7E82B318EAF00FD5A82 /* AudioKit */,
 			);
 			productName = Deafield;
 			productReference = 3B7C748D2B2DB7B4009D0435 /* Deafield.app */;
@@ -434,10 +438,15 @@
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_ASSET_PATHS = "\"Deafield/Preview Content\"";
-				DEVELOPMENT_TEAM = 4W6M7WPX3T;
+				DEVELOPMENT_TEAM = 7T8268J5NR;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = Deafield/Info.plist;
+				INFOPLIST_KEY_NSCameraUsageDescription = "Need camera access for uploading images";
+				INFOPLIST_KEY_NSLocationUsageDescription = "Need location access for updating nearby friends";
+				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "This app will use your location to show features near you.";
+				INFOPLIST_KEY_NSMicrophoneUsageDescription = "We need access to the microphone to analyze audio and provide haptic feedback.";
+				INFOPLIST_KEY_NSPhotoLibraryUsageDescription = "Need photo library access for saving and uploading images";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -448,7 +457,7 @@
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = Foundation.Deafield;
+				PRODUCT_BUNDLE_IDENTIFIER = Foundation.Deafield1;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
@@ -464,10 +473,15 @@
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_ASSET_PATHS = "\"Deafield/Preview Content\"";
-				DEVELOPMENT_TEAM = 4W6M7WPX3T;
+				DEVELOPMENT_TEAM = 7T8268J5NR;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = Deafield/Info.plist;
+				INFOPLIST_KEY_NSCameraUsageDescription = "Need camera access for uploading images";
+				INFOPLIST_KEY_NSLocationUsageDescription = "Need location access for updating nearby friends";
+				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "This app will use your location to show features near you.";
+				INFOPLIST_KEY_NSMicrophoneUsageDescription = "We need access to the microphone to analyze audio and provide haptic feedback.";
+				INFOPLIST_KEY_NSPhotoLibraryUsageDescription = "Need photo library access for saving and uploading images";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -620,18 +634,6 @@
 			};
 		};
 /* End XCRemoteSwiftPackageReference section */
-
-/* Begin XCSwiftPackageProductDependency section */
-		3B527C852B2DF5EE00F366F2 /* AudioKit */ = {
-			isa = XCSwiftPackageProductDependency;
-			productName = AudioKit;
-		};
-		3B61D7E82B318EAF00FD5A82 /* AudioKit */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = 3B61D7E72B318E8E00FD5A82 /* XCRemoteSwiftPackageReference "AudioKit" */;
-			productName = AudioKit;
-		};
-/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = 3B7C74852B2DB7B4009D0435 /* Project object */;
 }
