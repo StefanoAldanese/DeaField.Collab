@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		3B527C862B2DF5EE00F366F2 /* AudioKit in Frameworks */ = {isa = PBXBuildFile; productRef = 3B527C852B2DF5EE00F366F2 /* AudioKit */; };
+		3B61D7E92B318EAF00FD5A82 /* AudioKit in Frameworks */ = {isa = PBXBuildFile; productRef = 3B61D7E82B318EAF00FD5A82 /* AudioKit */; };
 		3B7C74912B2DB7B4009D0435 /* DeafieldApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B7C74902B2DB7B4009D0435 /* DeafieldApp.swift */; };
 		3B7C74932B2DB7B4009D0435 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B7C74922B2DB7B4009D0435 /* ContentView.swift */; };
 		3B7C74952B2DB7B5009D0435 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 3B7C74942B2DB7B5009D0435 /* Assets.xcassets */; };
@@ -52,6 +53,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				3B61D7E92B318EAF00FD5A82 /* AudioKit in Frameworks */,
 				3B527C862B2DF5EE00F366F2 /* AudioKit in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -147,6 +149,7 @@
 			name = Deafield;
 			packageProductDependencies = (
 				3B527C852B2DF5EE00F366F2 /* AudioKit */,
+				3B61D7E82B318EAF00FD5A82 /* AudioKit */,
 			);
 			productName = Deafield;
 			productReference = 3B7C748D2B2DB7B4009D0435 /* Deafield.app */;
@@ -222,6 +225,7 @@
 			mainGroup = 3B7C74842B2DB7B4009D0435;
 			packageReferences = (
 				3B527C842B2DF5EE00F366F2 /* XCLocalSwiftPackageReference "../AudioKit-main" */,
+				3B61D7E72B318E8E00FD5A82 /* XCRemoteSwiftPackageReference "AudioKit" */,
 			);
 			productRefGroup = 3B7C748E2B2DB7B4009D0435 /* Products */;
 			projectDirPath = "";
@@ -606,9 +610,25 @@
 		};
 /* End XCLocalSwiftPackageReference section */
 
+/* Begin XCRemoteSwiftPackageReference section */
+		3B61D7E72B318E8E00FD5A82 /* XCRemoteSwiftPackageReference "AudioKit" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/AudioKit/AudioKit";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 5.6.2;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
 /* Begin XCSwiftPackageProductDependency section */
 		3B527C852B2DF5EE00F366F2 /* AudioKit */ = {
 			isa = XCSwiftPackageProductDependency;
+			productName = AudioKit;
+		};
+		3B61D7E82B318EAF00FD5A82 /* AudioKit */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 3B61D7E72B318E8E00FD5A82 /* XCRemoteSwiftPackageReference "AudioKit" */;
 			productName = AudioKit;
 		};
 /* End XCSwiftPackageProductDependency section */
