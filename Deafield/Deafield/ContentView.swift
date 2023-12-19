@@ -32,8 +32,8 @@ class AudioRecorderManager: NSObject, ObservableObject, AVAudioRecorderDelegate 
     }
 
     func findAverageFrequencyInSineWave(_ samples: [Float], sampleRate: Double, duration: Double) -> Double? {
-        let segmentDuration = 0.5  // Durata del segmento in secondi
-        let segmentSamples = Int(sampleRate * segmentDuration)
+        let segmentDuration = 1  // Durata del segmento in secondi
+        let segmentSamples = Int(sampleRate * Double(segmentDuration))
 
         // Estrai il segmento corrente
         let segment = Array(samples.prefix(segmentSamples))
@@ -53,7 +53,6 @@ class AudioRecorderManager: NSObject, ObservableObject, AVAudioRecorderDelegate 
         return fundamentalFrequency.isFinite ? fundamentalFrequency : nil
     }
 
-
     func findDominantFrequencyInAudioFile(at url: URL, sampleRate: Double) -> [Double] {
         do {
             // Load audio file
@@ -64,7 +63,7 @@ class AudioRecorderManager: NSObject, ObservableObject, AVAudioRecorderDelegate 
 
             try audioFile.read(into: audioBuffer)
 
-            let segmentDuration: Double = 0.5 // Durata del segmento in secondi
+            let segmentDuration: Double = 1 // Durata del segmento in secondi
             let segmentSamples = Int(segmentDuration * sampleRate)
 
             var currentIndex = 0
@@ -94,6 +93,7 @@ class AudioRecorderManager: NSObject, ObservableObject, AVAudioRecorderDelegate 
             return []
         }
     }
+
 
     
     // Function to delete a recording
@@ -299,9 +299,10 @@ struct RecordingDetailView: View {
     var index: Int
     @ObservedObject var audioRecorderManager: AudioRecorderManager
     @State private var newName: String // Temporary variable for editing
-
     @State private var isEditing = false
-    
+    @State private var buttonColor: Color = .green
+    @State private var buttonText: String = "Analyze Frequency"
+
     public init(recordURL: URL, index: Int, audioRecorderManager: AudioRecorderManager, newName: String) {
         self.recordURL = recordURL
         self.index = index
@@ -324,35 +325,48 @@ struct RecordingDetailView: View {
                 if let recordingURL = audioRecorderManager.recordings[safe: index] {
                     Text("Recording Detail: \(recordingURL.lastPathComponent)")
                         .navigationBarTitle("Recording Detail")
-                }
 
-                Button(action: {
-                    if let recordingURL = audioRecorderManager.recordings[safe: index], FileManager.default.fileExists(atPath: recordingURL.path) {
-                        let sampleRate = 12000.0
+                    Button(action: {
+                        if let recordingURL = audioRecorderManager.recordings[safe: index], FileManager.default.fileExists(atPath: recordingURL.path) {
+                            let sampleRate = 12000.0
 
-                        // Use a local variable for dominant frequencies
-                        let dominantFrequencies = audioRecorderManager.findDominantFrequencyInAudioFile(at: recordingURL, sampleRate: sampleRate)
+                            let dominantFrequencies = audioRecorderManager.findDominantFrequencyInAudioFile(at: recordingURL, sampleRate: sampleRate)
 
-                        // Stampa l'array di frequenze dominanti
-                        print("Dominant Frequencies: \(dominantFrequencies)")
-                    } else {
-                        print("Recording does not exist")
+                            // Stampa l'array di frequenze dominanti
+                            print("Dominant Frequencies: \(dominantFrequencies)")
+
+                            // Cambia il colore e il testo del pulsante
+                            buttonColor = .red // Sostituisci con il colore che desideri
+                            buttonText = "Enjoy"
+
+                            // Avvia un timer per tornare allo stato originale dopo 1 secondo
+                            Timer.scheduledTimer(withTimeInterval: 1.0, repeats: false) { _ in
+                                buttonColor = .green
+                                buttonText = "Analyze Frequency"
+                            }
+                        } else {
+                            print("Recording does not exist")
+                        }
+                    }) {
+                        Text(buttonText)
+                            .padding()
+                            .background(buttonColor)
+                            .foregroundColor(.white)
+                            .cornerRadius(40)
                     }
-                }) {
-                    Text("Analyze Frequency")
-                        .padding()
-                        .background(Color.green)
-                        .foregroundColor(.white)
-                        .cornerRadius(40)
                 }
             }
         }
         .padding()
     }
 }
+
+
+
 // Estendi Collection per aggiungere l'accesso sicuro all'array
 extension Collection {
     subscript(safe index: Index) -> Element? {
         indices.contains(index) ? self[index] : nil
     }
 }
+
