@@ -32,24 +32,32 @@ class AudioRecorderManager: NSObject, ObservableObject, AVAudioRecorderDelegate 
     }
 
     func findAverageFrequencyInSineWave(_ samples: [Float], sampleRate: Double, duration: Double) -> Double? {
-        let segmentDuration = 1  // Durata del segmento in secondi
-        let segmentSamples = Int(sampleRate * Double(segmentDuration))
+        // Duration of the segment in seconds
+        let segmentDuration = 1.0
+        let segmentSamples = Int(sampleRate * segmentDuration)
 
-        // Estrai il segmento corrente
+        // Extract the current segment
         let segment = Array(samples.prefix(segmentSamples))
 
-        // Calcola l'autocorrelazione
+        // Calculate autocorrelation
         var autocorrelation = [Float](repeating: 0.0, count: segmentSamples)
         vDSP_conv(segment, 1, segment.reversed(), 1, &autocorrelation, 1, vDSP_Length(segmentSamples), vDSP_Length(segmentSamples))
 
-        // Trova il picco nella funzione di autocorrelazione
+        // Find the peak in the autocorrelation function
         var peakIndex: vDSP_Length = 0
         var peakValue: Float = 0.0
         vDSP_maxvi(autocorrelation, 1, &peakValue, &peakIndex, vDSP_Length(autocorrelation.count))
 
-        // Calcola la frequenza corrispondente
+        // Check if peakIndex is within a valid range
+        guard peakIndex > 0 && peakIndex < vDSP_Length(segmentSamples) else {
+            print("Invalid peakIndex: \(peakIndex)")
+            return nil
+        }
+
+        // Calculate the corresponding frequency
         let fundamentalFrequency = Double(sampleRate) / Double(peakIndex)
 
+        // Check if the fundamental frequency is finite
         return fundamentalFrequency.isFinite ? fundamentalFrequency : nil
     }
 
@@ -265,7 +273,7 @@ struct ContentView: View {
                 }
             }
             .padding(10)
-            .navigationBarTitle("Voice Memos")
+            .navigationBarTitle("Records")
             .alert(isPresented: $audioRecorderManager.showAlert) {
                 Alert(
                     title: Text("Microphone Access"),
@@ -302,6 +310,13 @@ struct RecordingDetailView: View {
     @State private var isEditing = false
     @State private var buttonColor: Color = .green
     @State private var buttonText: String = "Analyze Frequency"
+    @State private var currentIndex: Int = 0
+    @State private var enjoyState: EnjoyState = .analyzing
+
+    enum EnjoyState {
+        case analyzing
+        case enjoying
+    }
 
     public init(recordURL: URL, index: Int, audioRecorderManager: AudioRecorderManager, newName: String) {
         self.recordURL = recordURL
@@ -332,25 +347,68 @@ struct RecordingDetailView: View {
 
                             let dominantFrequencies = audioRecorderManager.findDominantFrequencyInAudioFile(at: recordingURL, sampleRate: sampleRate)
 
-                            // Stampa l'array di frequenze dominanti
-                            print("Dominant Frequencies: \(dominantFrequencies)")
+                            if !dominantFrequencies.isEmpty {
+                                // Iterate over each frequency in the array
+                                for (index, frequency) in dominantFrequencies.enumerated() {
+                                    // Start a timer for each case with a delay of 0.5 second * index
+                                    Timer.scheduledTimer(withTimeInterval: 0.5 * Double(index), repeats: false) { _ in
+                                        switch frequency {
+                                        case 1.0000000000000000...1.0009396499429402:
+                                            print("Case 1 for frequency \(frequency)")
+                                            updateEnjoyStateAndStartTimer()
+                                            
+                                        case  1.0009396499429403...1.0037959596075241:
+                                            print("Case 2 for frequency \(frequency)")
+                                            updateEnjoyStateAndStartTimer()
+                                            
+                                        case 1.0037959596075242...1.0437959596075242:
+                                            print("Case 3 for frequency \(frequency)")
+                                            updateEnjoyStateAndStartTimer()
+                                            
+                                        case 1.0437959596075243...1.0875085789366918:
+                                            print("Case 4 for frequency \(frequency)")
+                                            updateEnjoyStateAndStartTimer()
+                                            
+                                        case 1.0875085789366919...1.248829222603808:
+                                            print("Case 5 for frequency \(frequency)")
+                                            updateEnjoyStateAndStartTimer()
+                                            //---------------------------
+                                        case 1.248829222603809...1.4570920549926319:
+                                            print("Case 6 for frequency \(frequency)")
+                                            updateEnjoyStateAndStartTimer()
+                                            
+                                        case 1.4580801944106927...1.7258737235725585:
+                                            print("Case 7 for frequency \(frequency)")
+                                            updateEnjoyStateAndStartTimer()
+                                            
+                                        case 1.7482517482517483...3.623473254759746:
+                                            print("Case 8 for frequency \(frequency)")
+                                            updateEnjoyStateAndStartTimer()
+                                            
+                                        case 3.626473254759747...50.42016806722689:
+                                            print("Case 9 for frequency \(frequency)")
+                                            updateEnjoyStateAndStartTimer()
+                                            
+//                                        case let frequency where frequency > 50.42016806722689:
+//                                            print("Case for frequency greater than 50: \(frequency)")
+//                                            updateEnjoyStateAndStartTimer()
 
-                            // Cambia il colore e il testo del pulsante
-                            buttonColor = .red // Sostituisci con il colore che desideri
-                            buttonText = "Enjoy"
-
-                            // Avvia un timer per tornare allo stato originale dopo 1 secondo
-                            Timer.scheduledTimer(withTimeInterval: 1.0, repeats: false) { _ in
-                                buttonColor = .green
-                                buttonText = "Analyze Frequency"
+                                        default:
+                                            print("The frequency \(frequency) is NOT handled by any case")
+                                            updateEnjoyStateAndStartTimer()
+                                        }
+                                    }
+                                }
+                            } else {
+                                print("No dominant frequencies found")
                             }
                         } else {
                             print("Recording does not exist")
                         }
                     }) {
-                        Text(buttonText)
+                        Text(enjoyState == .analyzing ? "Analyze Frequency" : "Enjoy")
                             .padding()
-                            .background(buttonColor)
+                            .background(enjoyState == .analyzing ? buttonColor : .red)
                             .foregroundColor(.white)
                             .cornerRadius(40)
                     }
@@ -359,7 +417,19 @@ struct RecordingDetailView: View {
         }
         .padding()
     }
+
+    private func updateEnjoyStateAndStartTimer() {
+        // Update the state to change the button text
+        enjoyState = .enjoying
+
+        // Start a timer to return to the original state after 1 second
+        Timer.scheduledTimer(withTimeInterval: 1.0, repeats: false) { _ in
+            // Update the state to change the button text back to "Analyze Frequency"
+            enjoyState = .analyzing
+        }
+    }
 }
+
 
 
 
