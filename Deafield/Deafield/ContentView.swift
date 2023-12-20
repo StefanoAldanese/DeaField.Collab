@@ -1,3 +1,4 @@
+
 import SwiftUI
 import AVFoundation
 import Accelerate
@@ -433,12 +434,15 @@ struct RecordingDetailView: View {
     @ObservedObject var audioRecorderManager: AudioRecorderManager
     @ObservedObject var hapticManager = HapticManager()
     
+    @State private var backgroundColor: Color = .blue // New @State variable for background color
+    @State private var buttonText: String = "Analyze Frequency"
+    
     @State private var newName: String // Temporary variable for editing
     @State private var isEditing = false
     @State private var buttonColor: Color = .green
-    @State private var buttonText: String = "Analyze Frequency"
     @State private var currentIndex: Int = 0
     @State private var enjoyState: EnjoyState = .analyzing
+    @State private var isEnjoying = false
     
     // Haptic Engine & Player State:
     private var continuousPlayer: CHHapticAdvancedPatternPlayer?
@@ -478,6 +482,8 @@ struct RecordingDetailView: View {
                             let dominantFrequencies = self.audioRecorderManager.findDominantFrequencyInAudioFile(at: recordingURL, sampleRate: sampleRate)
                             
                             if !dominantFrequencies.isEmpty {
+                                self.isEnjoying = true  // Imposta il flag a true quando inizia la sequenza di enjoy
+                                
                                 for (index, frequency) in dominantFrequencies.enumerated() {
                                     Timer.scheduledTimer(withTimeInterval: 0.35 * Double(index), repeats: false) { _ in
                                         withAnimation {
@@ -485,48 +491,69 @@ struct RecordingDetailView: View {
                                             case 1.0000000000000000...1.0009396499429402:
                                                 print("Case 1 for frequency \(frequency)")
                                                 self.updateEnjoyStateAndStartTimer(with: "Case1Vibration", sharpness: 0.5, intensity: 1)
+                                                self.backgroundColor = .gray
                                                 
                                             case 1.0009396499429403...1.0037959596075241:
                                                 print("Case 2 for frequency \(frequency)")
                                                 self.updateEnjoyStateAndStartTimer(with: "Case1Vibration", sharpness: 0.5, intensity: 1)
+                                                self.backgroundColor = .red
                                                 
                                             case 1.0037959596075242...1.0437959596075242:
                                                 print("Case 3 for frequency \(frequency)")
                                                 self.updateEnjoyStateAndStartTimer(with: "Case1Vibration", sharpness: 0.5, intensity: 1)
+                                                self.backgroundColor = .orange
                                                 
                                             case 1.0437959596075243...1.0875085789366918:
                                                 print("Case 4 for frequency \(frequency)")
                                                 self.updateEnjoyStateAndStartTimer(with: "Case1Vibration", sharpness: 0.5, intensity: 1)
+                                                self.backgroundColor = .yellow
                                                 
                                             case 1.0875085789366919...1.248829222603808:
                                                 print("Case 5 for frequency \(frequency)")
                                                 self.updateEnjoyStateAndStartTimer(with: "Case1Vibration", sharpness: 0.5, intensity: 1)
+                                                self.backgroundColor = .green
                                                 
                                             case 1.248829222603809...1.4570920549926319:
                                                 print("Case 6 for frequency \(frequency)")
                                                 self.updateEnjoyStateAndStartTimer(with: "Case1Vibration", sharpness: 0.5, intensity: 1)
+                                                self.backgroundColor = .blue
                                                 
                                             case 1.4580801944106927...1.7258737235725585:
                                                 print("Case 7 for frequency \(frequency)")
                                                 self.updateEnjoyStateAndStartTimer(with: "Case1Vibration", sharpness: 0.5, intensity: 0.5)
+                                                self.backgroundColor = .purple
                                                 
                                             case 1.7482517482517483...3.623473254759746:
                                                 print("Case 8 for frequency \(frequency)")
                                                 self.updateEnjoyStateAndStartTimer(with: "Case1Vibration", sharpness: 0.5, intensity: 0.5)
+                                                self.backgroundColor = .pink
                                                 
                                             case 3.626473254759747...50.42016806722689:
                                                 print("Case 9 for frequency \(frequency)")
                                                 self.updateEnjoyStateAndStartTimer(with: "Case1Vibration", sharpness: 0.5, intensity: 0.5)
+                                                self.backgroundColor = .primary
                                                 
                                                 // Add more cases as needed...
                                                 
                                             default:
                                                 print("The frequency \(frequency) is NOT handled by any case")
                                                 self.updateEnjoyStateAndStartTimer(with: "DefaultVibration", sharpness: 0.5, intensity: 0.5)
+                                                self.backgroundColor = .white
                                             }
+                                        }
+                                        // Imposta lo stato di "Analyzing" solo dopo che tutte le frequenze sono state elaborate
+                                        if index == dominantFrequencies.count - 1 {
+                                            self.enjoyState = .analyzing
+                                            self.buttonText = "Analyze Frequency" // Imposta il testo del pulsante a "Analyze Frequency"
+                                            self.backgroundColor = .blue
                                         }
                                     }
                                 }
+                                
+                                // Imposta lo stato di "Enjoying" quando inizia la sequenza di enjoy
+                                self.enjoyState = .enjoying
+                                self.buttonText = "Enjoy" // Imposta il testo del pulsante a "Enjoy"
+                                self.backgroundColor = .blue
                             } else {
                                 print("No dominant frequencies found")
                             }
@@ -534,11 +561,11 @@ struct RecordingDetailView: View {
                             print("Recording does not exist")
                         }
                     }) {
-                        Text(enjoyState == .analyzing ? "Analyze Frequency" : "Enjoy")
-                            .padding()
-                            .background(enjoyState == .analyzing ? buttonColor : .red)
-                            .foregroundColor(.white)
-                            .cornerRadius(40)
+                        Text(buttonText) // Utilizza la variabile di stato per il testo del pulsante
+                                        .padding()
+                                        .background(backgroundColor)
+                                        .foregroundColor(.white)
+                                        .cornerRadius(40)
                     }
                 }
             }
