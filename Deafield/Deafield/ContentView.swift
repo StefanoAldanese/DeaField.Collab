@@ -1,4 +1,3 @@
-
 import SwiftUI
 import AVFoundation
 import Accelerate
@@ -434,15 +433,42 @@ struct RecordingDetailView: View {
     @ObservedObject var audioRecorderManager: AudioRecorderManager
     @ObservedObject var hapticManager = HapticManager()
     
-    @State private var backgroundColor: Color = .blue // New @State variable for background color
-    @State private var buttonText: String = "Analyze Frequency"
-    
     @State private var newName: String // Temporary variable for editing
     @State private var isEditing = false
     @State private var buttonColor: Color = .green
+    @State private var buttonText: String = "Analyze Frequency"
     @State private var currentIndex: Int = 0
     @State private var enjoyState: EnjoyState = .analyzing
+    
     @State private var isEnjoying = false
+    
+    
+    @State private var showAnimation1 = false
+    @State private var showAnimation2 = false
+    @State private var showAnimation3 = false
+    @State private var showAnimation4 = false
+    @State private var showAnimation5 = false
+    @State private var showAnimation6 = false
+    @State private var showAnimation7 = false
+    @State private var showAnimation8 = false
+    @State private var showAnimation9 = false
+    @State private var showAnimation10 = false
+    
+    private func updateEnjoyStateAndStartTimer(with vibrationIdentifier: String, sharpness: Float, intensity: Float) {
+        withAnimation {
+            enjoyState = .enjoying
+        }
+
+        hapticManager.triggerContinuousHapticFeedback(sharpness: sharpness, intensity: intensity)
+
+        DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
+            withAnimation {
+                self.enjoyState = .analyzing
+            }
+        }
+    }
+    
+    
     
     // Haptic Engine & Player State:
     private var continuousPlayer: CHHapticAdvancedPatternPlayer?
@@ -478,82 +504,94 @@ struct RecordingDetailView: View {
                     Button(action: {
                         if let recordingURL = self.audioRecorderManager.recordings[safe: self.index], FileManager.default.fileExists(atPath: recordingURL.path) {
                             let sampleRate = 12000.0
-                            
+
                             let dominantFrequencies = self.audioRecorderManager.findDominantFrequencyInAudioFile(at: recordingURL, sampleRate: sampleRate)
-                            
+
                             if !dominantFrequencies.isEmpty {
-                                self.isEnjoying = true  // Imposta il flag a true quando inizia la sequenza di enjoy
-                                
+                                self.isEnjoying = true  // Set the flag to true when the enjoy sequence starts
+
                                 for (index, frequency) in dominantFrequencies.enumerated() {
                                     Timer.scheduledTimer(withTimeInterval: 0.35 * Double(index), repeats: false) { _ in
                                         withAnimation {
                                             switch frequency {
+                                            // Replace the frequency ranges and color assignments with the ones from Codice 2
+                                            // Case 1
                                             case 1.0000000000000000...1.0009396499429402:
-                                                print("Case 1 for frequency \(frequency)")
                                                 self.updateEnjoyStateAndStartTimer(with: "Case1Vibration", sharpness: 0.5, intensity: 1)
-                                                self.backgroundColor = .gray
-                                                
+                                                self.buttonColor = .gray
+                                                self.showAnimation1 = true
+
+                                            // Case 2
                                             case 1.0009396499429403...1.0037959596075241:
-                                                print("Case 2 for frequency \(frequency)")
                                                 self.updateEnjoyStateAndStartTimer(with: "Case1Vibration", sharpness: 0.5, intensity: 1)
-                                                self.backgroundColor = .red
-                                                
+                                                self.buttonColor = .red
+                                                self.showAnimation2 = true
+
+                                            // Case 3
                                             case 1.0037959596075242...1.0437959596075242:
-                                                print("Case 3 for frequency \(frequency)")
                                                 self.updateEnjoyStateAndStartTimer(with: "Case1Vibration", sharpness: 0.5, intensity: 1)
-                                                self.backgroundColor = .orange
-                                                
+                                                self.buttonColor = .orange
+                                                self.showAnimation3 = true
+
+                                            // Case 4
                                             case 1.0437959596075243...1.0875085789366918:
-                                                print("Case 4 for frequency \(frequency)")
                                                 self.updateEnjoyStateAndStartTimer(with: "Case1Vibration", sharpness: 0.5, intensity: 1)
-                                                self.backgroundColor = .yellow
-                                                
+                                                self.buttonColor = .yellow
+                                                self.showAnimation4 = true
+
+                                            // Case 5
                                             case 1.0875085789366919...1.248829222603808:
-                                                print("Case 5 for frequency \(frequency)")
                                                 self.updateEnjoyStateAndStartTimer(with: "Case1Vibration", sharpness: 0.5, intensity: 1)
-                                                self.backgroundColor = .green
-                                                
+                                                self.buttonColor = .green
+                                                self.showAnimation5 = true
+
+                                            // Case 6
                                             case 1.248829222603809...1.4570920549926319:
-                                                print("Case 6 for frequency \(frequency)")
                                                 self.updateEnjoyStateAndStartTimer(with: "Case1Vibration", sharpness: 0.5, intensity: 1)
-                                                self.backgroundColor = .blue
-                                                
+                                                self.buttonColor = .blue
+                                                self.showAnimation6 = true
+
+                                            // Case 7
                                             case 1.4580801944106927...1.7258737235725585:
-                                                print("Case 7 for frequency \(frequency)")
                                                 self.updateEnjoyStateAndStartTimer(with: "Case1Vibration", sharpness: 0.5, intensity: 0.5)
-                                                self.backgroundColor = .purple
-                                                
+                                                self.buttonColor = .purple
+                                                self.showAnimation7 = true
+
+                                            // Case 8
                                             case 1.7482517482517483...3.623473254759746:
-                                                print("Case 8 for frequency \(frequency)")
                                                 self.updateEnjoyStateAndStartTimer(with: "Case1Vibration", sharpness: 0.5, intensity: 0.5)
-                                                self.backgroundColor = .pink
-                                                
+                                                self.buttonColor = .pink
+                                                self.showAnimation8 = true
+
+                                            // Case 9
                                             case 3.626473254759747...50.42016806722689:
-                                                print("Case 9 for frequency \(frequency)")
                                                 self.updateEnjoyStateAndStartTimer(with: "Case1Vibration", sharpness: 0.5, intensity: 0.5)
-                                                self.backgroundColor = .primary
-                                                
-                                                // Add more cases as needed...
-                                                
+                                                self.buttonColor = .primary
+                                                self.showAnimation9 = true
+
+                                            // Add more cases as needed...
+
                                             default:
-                                                print("The frequency \(frequency) is NOT handled by any case")
                                                 self.updateEnjoyStateAndStartTimer(with: "DefaultVibration", sharpness: 0.5, intensity: 0.5)
-                                                self.backgroundColor = .white
+                                                self.buttonColor = .white
+                                                self.showAnimation1 = true
                                             }
                                         }
-                                        // Imposta lo stato di "Analyzing" solo dopo che tutte le frequenze sono state elaborate
+
+                                        // Set the state to "Analyzing" only after all frequencies have been processed
                                         if index == dominantFrequencies.count - 1 {
                                             self.enjoyState = .analyzing
-                                            self.buttonText = "Analyze Frequency" // Imposta il testo del pulsante a "Analyze Frequency"
-                                            self.backgroundColor = .blue
+                                            self.buttonText = "Analyze Frequency"
+                                            self.buttonColor = .green
+                                            self.isEnjoying = false
                                         }
                                     }
                                 }
-                                
-                                // Imposta lo stato di "Enjoying" quando inizia la sequenza di enjoy
+
+                                // Set the state to "Enjoying" when the enjoy sequence starts
                                 self.enjoyState = .enjoying
-                                self.buttonText = "Enjoy" // Imposta il testo del pulsante a "Enjoy"
-                                self.backgroundColor = .blue
+                                self.buttonText = "Enjoy"
+                                self.buttonColor = .blue
                             } else {
                                 print("No dominant frequencies found")
                             }
@@ -561,36 +599,482 @@ struct RecordingDetailView: View {
                             print("Recording does not exist")
                         }
                     }) {
-                        Text(buttonText) // Utilizza la variabile di stato per il testo del pulsante
-                                        .padding()
-                                        .background(backgroundColor)
-                                        .foregroundColor(.white)
-                                        .cornerRadius(40)
+                        Text(buttonText)
+                            .padding()
+                            .background(buttonColor)
+                            .foregroundColor(.white)
+                            .cornerRadius(40)
                     }
+                    // Aggiunto questo blocco per mostrare ContentViewAnimation
+                                        if showAnimation1 {
+                                            ContentViewAnimation1()
+                                                .onDisappear {
+                                                    // Chiamato quando la ContentViewAnimation è chiusa
+                                                    self.showAnimation1 = false
+                                                     
+                                                    
+                                                }
+                                        }else if showAnimation2 {
+                                            ContentViewAnimation2()
+                                            
+                                                .onDisappear {
+                                                    // Chiamato quando la ContentViewAnimation è chiusa
+                                                    self.showAnimation2 = false
+                                                 
+                                                }
+                                        }else if showAnimation3 {
+                                            ContentViewAnimation3()
+                                            
+                                                .onDisappear {
+                                                    // Chiamato quando la ContentViewAnimation è chiusa
+                                                    self.showAnimation3 = false
+                                                 
+                                                }
+                                        }else if showAnimation4 {
+                                            ContentViewAnimation4()
+                                                .onDisappear {
+                                                    // Chiamato quando la ContentViewAnimation è chiusa
+                                                    self.showAnimation4 = false
+                                                 
+                                                }
+                                        }else if showAnimation5 {
+                                            ContentViewAnimation5()
+                                                .onDisappear {
+                                                    // Chiamato quando la ContentViewAnimation è chiusa
+                                                    self.showAnimation5 = false
+                                                 
+                                                }
+                                        }else if showAnimation6 {
+                                            ContentViewAnimation6()
+                                                .onDisappear {
+                                                    // Chiamato quando la ContentViewAnimation è chiusa
+                                                    self.showAnimation6 = false
+                                                 
+                                                }
+                                        }else if showAnimation7 {
+                                            ContentViewAnimation7()
+                                                .onDisappear {
+                                                    // Chiamato quando la ContentViewAnimation è chiusa
+                                                    self.showAnimation7 = false
+                                                 
+                                                }
+                                        }else if showAnimation8 {
+                                            ContentViewAnimation8()
+                                                .onDisappear {
+                                                    // Chiamato quando la ContentViewAnimation è chiusa
+                                                    self.showAnimation8 = false
+                                                 
+                                                }
+                                        }else if showAnimation9 {
+                                            ContentViewAnimation9()
+                                                .onDisappear {
+                                                    // Chiamato quando la ContentViewAnimation è chiusa
+                                                    self.showAnimation9 = false
+                                                 
+                                                }
+                                        }else if showAnimation10 {
+                                            ContentViewAnimation10()
+                                                .onDisappear {
+                                                    // Chiamato quando la ContentViewAnimation è chiusa
+                                                    self.showAnimation10 = false
+                                                 
+                                                }
+                                        }
+                                    }
+                                }
+                            }
+                            .padding()
+                            .onAppear {
+                                do {
+                                    try self.hapticManager.engine?.start()
+                                } catch {
+                                    print("Error starting Core Haptics engine: \(error.localizedDescription)")
+                                }
+                            }
+                        }
+                    }
+    
+    
+
+
+struct ContentViewAnimation1: View {
+    @State private var offset: CGFloat = -130
+    @State private var rotation: Double = 0
+
+    var body: some View {
+        ZStack {
+            Color.black.edgesIgnoringSafeArea(.all)
+
+            ZStack {
+                ForEach(0..<20) { i in
+                    Circle()
+                        .frame(width: 20, height: 20)
+                        .foregroundColor(.cyan)
+                        .offset(y: offset)
+                        .animation(.easeInOut(duration: 0.5).repeatForever(autoreverses: true).delay(0.5 * Double(i)), value: offset + 15 * Double(i))
+
+                        .rotationEffect(.degrees((360 / 20) * Double(i)))
+                }
+
+                ForEach(0..<20) { i in
+                    Circle()
+                        .frame(width: 5, height: 5)
+                        .foregroundColor(.cyan)
+                        .offset(y: offset + 60)
+                        .animation(.easeInOut(duration: 0.5).repeatForever(autoreverses: true).delay(0.5 * Double(i)), value: offset)
+                        .rotationEffect(.degrees((360 / 20) * Double(i)))
                 }
             }
+            .rotationEffect(.degrees(rotation), anchor: .center)
         }
-        .padding()
+        .animation(.linear(duration: 5).repeatForever(autoreverses: false), value: rotation)
         .onAppear {
-            do {
-                try self.hapticManager.engine?.start()
-            } catch {
-                print("Error starting Core Haptics engine: \(error.localizedDescription)")
-            }
+            offset += 30
+            rotation = 360
         }
     }
-    
-    private func updateEnjoyStateAndStartTimer(with vibrationIdentifier: String, sharpness: Float, intensity: Float) {
-        withAnimation {
-            enjoyState = .enjoying
-        }
+}
 
-        hapticManager.triggerContinuousHapticFeedback(sharpness: sharpness, intensity: intensity)
+struct ContentViewAnimation2: View {
+    @State private var offset: CGFloat = -130
+    @State private var rotation: Double = 0
 
-        DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
-            withAnimation {
-                self.enjoyState = .analyzing
+    var body: some View {
+        ZStack {
+            Color.black.edgesIgnoringSafeArea(.all)
+
+            ZStack {
+                ForEach(0..<20) { i in
+                    Circle()
+                        .frame(width: 20, height: 20)
+                        .foregroundColor(.cyan)
+                        .offset(y: offset)
+                        .animation(.easeInOut(duration: 0.5).repeatForever(autoreverses: true).delay(0.5 * Double(i)), value: offset + 25 * Double(i))
+
+                        .rotationEffect(.degrees((360 / 20) * Double(i)))
+                }
+
+                ForEach(0..<20) { i in
+                    Circle()
+                        .frame(width: 5, height: 5)
+                        .foregroundColor(.cyan)
+                        .offset(y: offset + 60)
+                        .animation(.easeInOut(duration: 0.5).repeatForever(autoreverses: true).delay(0.5 * Double(i)), value: offset)
+                        .rotationEffect(.degrees((360 / 20) * Double(i)))
+                }
             }
+            .rotationEffect(.degrees(rotation), anchor: .center)
+        }
+        .animation(.linear(duration: 5).repeatForever(autoreverses: false), value: rotation)
+        .onAppear {
+            offset += 30
+            rotation = 360
+        }
+    }
+}
+
+struct ContentViewAnimation3: View {
+    @State private var offset: CGFloat = -130
+    @State private var rotation: Double = 0
+
+    var body: some View {
+        ZStack {
+            Color.black.edgesIgnoringSafeArea(.all)
+
+            ZStack {
+                ForEach(0..<20) { i in
+                    Circle()
+                        .frame(width: 20, height: 20)
+                        .foregroundColor(.cyan)
+                        .offset(y: offset)
+                        .animation(.easeInOut(duration: 0.5).repeatForever(autoreverses: true).delay(0.5 * Double(i)), value: offset + 35 * Double(i))
+
+                        .rotationEffect(.degrees((360 / 20) * Double(i)))
+                }
+
+                ForEach(0..<20) { i in
+                    Circle()
+                        .frame(width: 5, height: 5)
+                        .foregroundColor(.cyan)
+                        .offset(y: offset + 60)
+                        .animation(.easeInOut(duration: 0.5).repeatForever(autoreverses: true).delay(0.5 * Double(i)), value: offset)
+                        .rotationEffect(.degrees((360 / 20) * Double(i)))
+                }
+            }
+            .rotationEffect(.degrees(rotation), anchor: .center)
+        }
+        .animation(.linear(duration: 5).repeatForever(autoreverses: false), value: rotation)
+        .onAppear {
+            offset += 30
+            rotation = 360
+        }
+    }
+}
+
+struct ContentViewAnimation4: View {
+    @State private var offset: CGFloat = -130
+    @State private var rotation: Double = 0
+
+    var body: some View {
+        ZStack {
+            Color.black.edgesIgnoringSafeArea(.all)
+
+            ZStack {
+                ForEach(0..<20) { i in
+                    Circle()
+                        .frame(width: 20, height: 20)
+                        .foregroundColor(.cyan)
+                        .offset(y: offset)
+                        .animation(.easeInOut(duration: 0.5).repeatForever(autoreverses: true).delay(0.5 * Double(i)), value: offset + 45 * Double(i))
+
+                        .rotationEffect(.degrees((360 / 20) * Double(i)))
+                }
+
+                ForEach(0..<20) { i in
+                    Circle()
+                        .frame(width: 5, height: 5)
+                        .foregroundColor(.cyan)
+                        .offset(y: offset + 60)
+                        .animation(.easeInOut(duration: 0.5).repeatForever(autoreverses: true).delay(0.5 * Double(i)), value: offset)
+                        .rotationEffect(.degrees((360 / 20) * Double(i)))
+                }
+            }
+            .rotationEffect(.degrees(rotation), anchor: .center)
+        }
+        .animation(.linear(duration: 5).repeatForever(autoreverses: false), value: rotation)
+        .onAppear {
+            offset += 30
+            rotation = 360
+        }
+    }
+}
+
+struct ContentViewAnimation5: View {
+    @State private var offset: CGFloat = -130
+    @State private var rotation: Double = 0
+
+    var body: some View {
+        ZStack {
+            Color.black.edgesIgnoringSafeArea(.all)
+
+            ZStack {
+                ForEach(0..<20) { i in
+                    Circle()
+                        .frame(width: 20, height: 20)
+                        .foregroundColor(.cyan)
+                        .offset(y: offset)
+                        .animation(.easeInOut(duration: 0.5).repeatForever(autoreverses: true).delay(0.5 * Double(i)), value: offset + 55 * Double(i))
+
+                        .rotationEffect(.degrees((360 / 20) * Double(i)))
+                }
+
+                ForEach(0..<20) { i in
+                    Circle()
+                        .frame(width: 5, height: 5)
+                        .foregroundColor(.cyan)
+                        .offset(y: offset + 60)
+                        .animation(.easeInOut(duration: 0.5).repeatForever(autoreverses: true).delay(0.5 * Double(i)), value: offset)
+                        .rotationEffect(.degrees((360 / 20) * Double(i)))
+                }
+            }
+            .rotationEffect(.degrees(rotation), anchor: .center)
+        }
+        .animation(.linear(duration: 5).repeatForever(autoreverses: false), value: rotation)
+        .onAppear {
+            offset += 30
+            rotation = 360
+        }
+    }
+}
+
+struct ContentViewAnimation6: View {
+    @State private var offset: CGFloat = -130
+    @State private var rotation: Double = 0
+
+    var body: some View {
+        ZStack {
+            Color.black.edgesIgnoringSafeArea(.all)
+
+            ZStack {
+                ForEach(0..<20) { i in
+                    Circle()
+                        .frame(width: 20, height: 20)
+                        .foregroundColor(.cyan)
+                        .offset(y: offset)
+                        .animation(.easeInOut(duration: 0.5).repeatForever(autoreverses: true).delay(0.5 * Double(i)), value: offset + 65 * Double(i))
+
+                        .rotationEffect(.degrees((360 / 20) * Double(i)))
+                }
+
+                ForEach(0..<20) { i in
+                    Circle()
+                        .frame(width: 5, height: 5)
+                        .foregroundColor(.cyan)
+                        .offset(y: offset + 60)
+                        .animation(.easeInOut(duration: 0.5).repeatForever(autoreverses: true).delay(0.5 * Double(i)), value: offset)
+                        .rotationEffect(.degrees((360 / 20) * Double(i)))
+                }
+            }
+            .rotationEffect(.degrees(rotation), anchor: .center)
+        }
+        .animation(.linear(duration: 5).repeatForever(autoreverses: false), value: rotation)
+        .onAppear {
+            offset += 30
+            rotation = 360
+        }
+    }
+}
+
+struct ContentViewAnimation7: View {
+    @State private var offset: CGFloat = -130
+    @State private var rotation: Double = 0
+
+    var body: some View {
+        ZStack {
+            Color.black.edgesIgnoringSafeArea(.all)
+
+            ZStack {
+                ForEach(0..<20) { i in
+                    Circle()
+                        .frame(width: 20, height: 20)
+                        .foregroundColor(.cyan)
+                        .offset(y: offset)
+                        .animation(.easeInOut(duration: 0.5).repeatForever(autoreverses: true).delay(0.5 * Double(i)), value: offset + 75 * Double(i))
+
+                        .rotationEffect(.degrees((360 / 20) * Double(i)))
+                }
+
+                ForEach(0..<20) { i in
+                    Circle()
+                        .frame(width: 5, height: 5)
+                        .foregroundColor(.cyan)
+                        .offset(y: offset + 60)
+                        .animation(.easeInOut(duration: 0.5).repeatForever(autoreverses: true).delay(0.5 * Double(i)), value: offset)
+                        .rotationEffect(.degrees((360 / 20) * Double(i)))
+                }
+            }
+            .rotationEffect(.degrees(rotation), anchor: .center)
+        }
+        .animation(.linear(duration: 5).repeatForever(autoreverses: false), value: rotation)
+        .onAppear {
+            offset += 30
+            rotation = 360
+        }
+    }
+}
+
+struct ContentViewAnimation8: View {
+    @State private var offset: CGFloat = -130
+    @State private var rotation: Double = 0
+
+    var body: some View {
+        ZStack {
+            Color.black.edgesIgnoringSafeArea(.all)
+
+            ZStack {
+                ForEach(0..<20) { i in
+                    Circle()
+                        .frame(width: 20, height: 20)
+                        .foregroundColor(.cyan)
+                        .offset(y: offset)
+                        .animation(.easeInOut(duration: 0.5).repeatForever(autoreverses: true).delay(0.5 * Double(i)), value: offset + 85 * Double(i))
+
+                        .rotationEffect(.degrees((360 / 20) * Double(i)))
+                }
+
+                ForEach(0..<20) { i in
+                    Circle()
+                        .frame(width: 5, height: 5)
+                        .foregroundColor(.cyan)
+                        .offset(y: offset + 60)
+                        .animation(.easeInOut(duration: 0.5).repeatForever(autoreverses: true).delay(0.5 * Double(i)), value: offset)
+                        .rotationEffect(.degrees((360 / 20) * Double(i)))
+                }
+            }
+            .rotationEffect(.degrees(rotation), anchor: .center)
+        }
+        .animation(.linear(duration: 5).repeatForever(autoreverses: false), value: rotation)
+        .onAppear {
+            offset += 30
+            rotation = 360
+        }
+    }
+}
+
+
+struct ContentViewAnimation9: View {
+    @State private var offset: CGFloat = -130
+    @State private var rotation: Double = 0
+
+    var body: some View {
+        ZStack {
+            Color.black.edgesIgnoringSafeArea(.all)
+
+            ZStack {
+                ForEach(0..<20) { i in
+                    Circle()
+                        .frame(width: 20, height: 20)
+                        .foregroundColor(.cyan)
+                        .offset(y: offset)
+                        .animation(.easeInOut(duration: 0.5).repeatForever(autoreverses: true).delay(0.5 * Double(i)), value: offset + 95 * Double(i))
+
+                        .rotationEffect(.degrees((360 / 20) * Double(i)))
+                }
+
+                ForEach(0..<20) { i in
+                    Circle()
+                        .frame(width: 5, height: 5)
+                        .foregroundColor(.cyan)
+                        .offset(y: offset + 60)
+                        .animation(.easeInOut(duration: 0.5).repeatForever(autoreverses: true).delay(0.5 * Double(i)), value: offset)
+                        .rotationEffect(.degrees((360 / 20) * Double(i)))
+                }
+            }
+            .rotationEffect(.degrees(rotation), anchor: .center)
+        }
+        .animation(.linear(duration: 5).repeatForever(autoreverses: false), value: rotation)
+        .onAppear {
+            offset += 30
+            rotation = 360
+        }
+    }
+}
+
+
+struct ContentViewAnimation10: View {
+    @State private var offset: CGFloat = -130
+    @State private var rotation: Double = 0
+
+    var body: some View {
+        ZStack {
+            Color.black.edgesIgnoringSafeArea(.all)
+
+            ZStack {
+                ForEach(0..<20) { i in
+                    Circle()
+                        .frame(width: 20, height: 20)
+                        .foregroundColor(.cyan)
+                        .offset(y: offset)
+                        .animation(.easeInOut(duration: 0.5).repeatForever(autoreverses: true).delay(0.5 * Double(i)), value: offset + 105 * Double(i))
+
+                        .rotationEffect(.degrees((360 / 20) * Double(i)))
+                }
+
+                ForEach(0..<20) { i in
+                    Circle()
+                        .frame(width: 5, height: 5)
+                        .foregroundColor(.cyan)
+                        .offset(y: offset + 60)
+                        .animation(.easeInOut(duration: 0.5).repeatForever(autoreverses: true).delay(0.5 * Double(i)), value: offset)
+                        .rotationEffect(.degrees((360 / 20) * Double(i)))
+                }
+            }
+            .rotationEffect(.degrees(rotation), anchor: .center)
+        }
+        .animation(.linear(duration: 5).repeatForever(autoreverses: false), value: rotation)
+        .onAppear {
+            offset += 30
+            rotation = 360
         }
     }
 }
