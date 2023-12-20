@@ -3,6 +3,7 @@ import AVFoundation
 import Accelerate
 import CoreHaptics
 
+
 class AudioRecorderManager: NSObject, ObservableObject, AVAudioRecorderDelegate {
     @Published var isRecording = false
     @Published var numberOfRecords = 0
@@ -357,38 +358,111 @@ struct WelcomeView: View {
     }
 }
 
+class HapticEngineManager: ObservableObject {
+    @Published var engine: CHHapticEngine?
+
+    init() {
+        do {
+            engine = try CHHapticEngine()
+            try engine?.start()
+        } catch {
+            print("Error initializing Core Haptics engine: \(error.localizedDescription)")
+        }
+    }
+}
+
+
+
+extension Collection {
+    subscript(safe index: Index) -> Element? {
+        guard indices.contains(index) else { return nil }
+        return self[index]
+    }
+}
+
+extension UserDefaults {
+    static var isFirstLaunch: Bool {
+        get { !standard.bool(forKey: "hasLaunchedBefore") }
+        set { standard.set(!newValue, forKey: "hasLaunchedBefore") }
+    }
+}
+
+final class HapticManager: ObservableObject {
+    internal var engine: CHHapticEngine?
+    
+    init() {
+        do {
+            engine = try CHHapticEngine()
+            try engine?.start()
+        } catch {
+            print("Error initializing Core Haptics engine: \(error.localizedDescription)")
+        }
+    }
+
+    func triggerContinuousHapticFeedback(sharpness: Float, intensity: Float) {
+        guard let engine = engine else {
+            print("Haptic engine is not available.")
+            return
+        }
+
+        do {
+            let event = try CHHapticEvent(
+                eventType: .hapticContinuous,
+                parameters: [
+                    CHHapticEventParameter(parameterID: .hapticSharpness, value: sharpness),
+                    CHHapticEventParameter(parameterID: .hapticIntensity, value: intensity)
+                ],
+                relativeTime: 0,
+                duration: 1
+            )
+
+            let pattern = try CHHapticPattern(events: [event], parameters: [])
+            try engine.start()
+
+            let player = try engine.makeAdvancedPlayer(with: pattern)
+            try player.start(atTime: CHHapticTimeImmediate)
+        } catch {
+            print("Error triggering haptic feedback: \(error.localizedDescription)")
+        }
+    }
+}
 
 struct RecordingDetailView: View {
     var recordURL: URL
     var index: Int
     @ObservedObject var audioRecorderManager: AudioRecorderManager
+    @ObservedObject var hapticManager = HapticManager()
+    
     @State private var newName: String // Temporary variable for editing
     @State private var isEditing = false
     @State private var buttonColor: Color = .green
     @State private var buttonText: String = "Analyze Frequency"
     @State private var currentIndex: Int = 0
     @State private var enjoyState: EnjoyState = .analyzing
-
+    
+    // Haptic Engine & Player State:
+    private var continuousPlayer: CHHapticAdvancedPatternPlayer?
+    
     enum EnjoyState {
         case analyzing
         case enjoying
     }
-
-    public init(recordURL: URL, index: Int, audioRecorderManager: AudioRecorderManager, newName: String) {
+    
+    init(recordURL: URL, index: Int, audioRecorderManager: AudioRecorderManager, newName: String) {
         self.recordURL = recordURL
         self.index = index
         self.audioRecorderManager = audioRecorderManager
         self._newName = State(initialValue: newName)
     }
-
+    
     var body: some View {
         VStack {
             if isEditing {
                 TextField("Enter a new name", text: $newName, onCommit: {
-                    guard !newName.isEmpty else { return }
-                    audioRecorderManager.recordings[index] = recordURL.deletingLastPathComponent().appendingPathComponent(newName)
-                    audioRecorderManager.loadPreviousRecords()  // Update the record list
-                    isEditing = false
+                    guard !self.newName.isEmpty else { return }
+                    self.audioRecorderManager.recordings[self.index] = self.recordURL.deletingLastPathComponent().appendingPathComponent(self.newName)
+                    self.audioRecorderManager.loadPreviousRecords()  // Update the record list
+                    self.isEditing = false
                 })
                 .padding()
                 .textFieldStyle(RoundedBorderTextFieldStyle())
@@ -396,62 +470,60 @@ struct RecordingDetailView: View {
                 if let recordingURL = audioRecorderManager.recordings[safe: index] {
                     Text("Recording Detail: \(recordingURL.lastPathComponent)")
                         .navigationBarTitle("Recording Detail")
-
+                    
                     Button(action: {
-                        if let recordingURL = audioRecorderManager.recordings[safe: index], FileManager.default.fileExists(atPath: recordingURL.path) {
+                        if let recordingURL = self.audioRecorderManager.recordings[safe: self.index], FileManager.default.fileExists(atPath: recordingURL.path) {
                             let sampleRate = 12000.0
-
-                            let dominantFrequencies = audioRecorderManager.findDominantFrequencyInAudioFile(at: recordingURL, sampleRate: sampleRate)
-
+                            
+                            let dominantFrequencies = self.audioRecorderManager.findDominantFrequencyInAudioFile(at: recordingURL, sampleRate: sampleRate)
+                            
                             if !dominantFrequencies.isEmpty {
-                                // Iterate over each frequency in the array
                                 for (index, frequency) in dominantFrequencies.enumerated() {
-                                    // Start a timer for each case with a delay of 0.5 second * index
-                                    Timer.scheduledTimer(withTimeInterval: 0.5 * Double(index), repeats: false) { _ in
-                                        switch frequency {
-                                        case 1.0000000000000000...1.0009396499429402:
-                                            print("Case 1 for frequency \(frequency)")
-                                            updateEnjoyStateAndStartTimer()
-                                            
-                                        case  1.0009396499429403...1.0037959596075241:
-                                            print("Case 2 for frequency \(frequency)")
-                                            updateEnjoyStateAndStartTimer()
-                                            
-                                        case 1.0037959596075242...1.0437959596075242:
-                                            print("Case 3 for frequency \(frequency)")
-                                            updateEnjoyStateAndStartTimer()
-                                            
-                                        case 1.0437959596075243...1.0875085789366918:
-                                            print("Case 4 for frequency \(frequency)")
-                                            updateEnjoyStateAndStartTimer()
-                                            
-                                        case 1.0875085789366919...1.248829222603808:
-                                            print("Case 5 for frequency \(frequency)")
-                                            updateEnjoyStateAndStartTimer()
-                                            //---------------------------
-                                        case 1.248829222603809...1.4570920549926319:
-                                            print("Case 6 for frequency \(frequency)")
-                                            updateEnjoyStateAndStartTimer()
-                                            
-                                        case 1.4580801944106927...1.7258737235725585:
-                                            print("Case 7 for frequency \(frequency)")
-                                            updateEnjoyStateAndStartTimer()
-                                            
-                                        case 1.7482517482517483...3.623473254759746:
-                                            print("Case 8 for frequency \(frequency)")
-                                            updateEnjoyStateAndStartTimer()
-                                            
-                                        case 3.626473254759747...50.42016806722689:
-                                            print("Case 9 for frequency \(frequency)")
-                                            updateEnjoyStateAndStartTimer()
-                                            
-//                                        case let frequency where frequency > 50.42016806722689:
-//                                            print("Case for frequency greater than 50: \(frequency)")
-//                                            updateEnjoyStateAndStartTimer()
-
-                                        default:
-                                            print("The frequency \(frequency) is NOT handled by any case")
-                                            updateEnjoyStateAndStartTimer()
+                                    Timer.scheduledTimer(withTimeInterval: 0.35 * Double(index), repeats: false) { _ in
+                                        withAnimation {
+                                            switch frequency {
+                                            case 1.0000000000000000...1.0009396499429402:
+                                                print("Case 1 for frequency \(frequency)")
+                                                self.updateEnjoyStateAndStartTimer(with: "Case1Vibration", sharpness: 0.5, intensity: 1)
+                                                
+                                            case 1.0009396499429403...1.0037959596075241:
+                                                print("Case 2 for frequency \(frequency)")
+                                                self.updateEnjoyStateAndStartTimer(with: "Case1Vibration", sharpness: 0.5, intensity: 1)
+                                                
+                                            case 1.0037959596075242...1.0437959596075242:
+                                                print("Case 3 for frequency \(frequency)")
+                                                self.updateEnjoyStateAndStartTimer(with: "Case1Vibration", sharpness: 0.5, intensity: 1)
+                                                
+                                            case 1.0437959596075243...1.0875085789366918:
+                                                print("Case 4 for frequency \(frequency)")
+                                                self.updateEnjoyStateAndStartTimer(with: "Case1Vibration", sharpness: 0.5, intensity: 1)
+                                                
+                                            case 1.0875085789366919...1.248829222603808:
+                                                print("Case 5 for frequency \(frequency)")
+                                                self.updateEnjoyStateAndStartTimer(with: "Case1Vibration", sharpness: 0.5, intensity: 1)
+                                                
+                                            case 1.248829222603809...1.4570920549926319:
+                                                print("Case 6 for frequency \(frequency)")
+                                                self.updateEnjoyStateAndStartTimer(with: "Case1Vibration", sharpness: 0.5, intensity: 1)
+                                                
+                                            case 1.4580801944106927...1.7258737235725585:
+                                                print("Case 7 for frequency \(frequency)")
+                                                self.updateEnjoyStateAndStartTimer(with: "Case1Vibration", sharpness: 0.5, intensity: 0.5)
+                                                
+                                            case 1.7482517482517483...3.623473254759746:
+                                                print("Case 8 for frequency \(frequency)")
+                                                self.updateEnjoyStateAndStartTimer(with: "Case1Vibration", sharpness: 0.5, intensity: 0.5)
+                                                
+                                            case 3.626473254759747...50.42016806722689:
+                                                print("Case 9 for frequency \(frequency)")
+                                                self.updateEnjoyStateAndStartTimer(with: "Case1Vibration", sharpness: 0.5, intensity: 0.5)
+                                                
+                                                // Add more cases as needed...
+                                                
+                                            default:
+                                                print("The frequency \(frequency) is NOT handled by any case")
+                                                self.updateEnjoyStateAndStartTimer(with: "DefaultVibration", sharpness: 0.5, intensity: 0.5)
+                                            }
                                         }
                                     }
                                 }
@@ -472,33 +544,26 @@ struct RecordingDetailView: View {
             }
         }
         .padding()
-    }
-
-    private func updateEnjoyStateAndStartTimer() {
-        // Update the state to change the button text
-        enjoyState = .enjoying
-
-        // Start a timer to return to the original state after 1 second
-        Timer.scheduledTimer(withTimeInterval: 1.0, repeats: false) { _ in
-            // Update the state to change the button text back to "Analyze Frequency"
-            enjoyState = .analyzing
+        .onAppear {
+            do {
+                try self.hapticManager.engine?.start()
+            } catch {
+                print("Error starting Core Haptics engine: \(error.localizedDescription)")
+            }
         }
     }
-}
+    
+    private func updateEnjoyStateAndStartTimer(with vibrationIdentifier: String, sharpness: Float, intensity: Float) {
+        withAnimation {
+            enjoyState = .enjoying
+        }
 
+        hapticManager.triggerContinuousHapticFeedback(sharpness: sharpness, intensity: intensity)
 
-
-
-// Estendi Collection per aggiungere l'accesso sicuro all'array
-extension Collection {
-    subscript(safe index: Index) -> Element? {
-        indices.contains(index) ? self[index] : nil
-    }
-}
-
-extension UserDefaults {
-    static var isFirstLaunch: Bool {
-        get { !standard.bool(forKey: "hasLaunchedBefore") }
-        set { standard.set(!newValue, forKey: "hasLaunchedBefore") }
+        DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
+            withAnimation {
+                self.enjoyState = .analyzing
+            }
+        }
     }
 }

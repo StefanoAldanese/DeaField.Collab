@@ -442,6 +442,7 @@
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = Deafield/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = DeaField;
 				INFOPLIST_KEY_NSCameraUsageDescription = "Need camera access for uploading images";
 				INFOPLIST_KEY_NSLocationUsageDescription = "Need location access for updating nearby friends";
 				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "This app will use your location to show features near you.";
@@ -477,6 +478,7 @@
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = Deafield/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = DeaField;
 				INFOPLIST_KEY_NSCameraUsageDescription = "Need camera access for uploading images";
 				INFOPLIST_KEY_NSLocationUsageDescription = "Need location access for updating nearby friends";
 				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "This app will use your location to show features near you.";
