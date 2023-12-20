@@ -584,6 +584,16 @@ struct RecordingDetailView: View {
                                             self.buttonText = "Analyze Frequency"
                                             self.buttonColor = .green
                                             self.isEnjoying = false
+                                            
+                                            self.showAnimation1 = false
+                                            self.showAnimation2 = false
+                                            self.showAnimation3 = false
+                                            self.showAnimation4 = false
+                                            self.showAnimation5 = false
+                                            self.showAnimation6 = false
+                                            self.showAnimation7 = false
+                                            self.showAnimation8 = false
+                                            self.showAnimation9 = false
                                         }
                                     }
                                 }
