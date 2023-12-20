@@ -1,10 +1,3 @@
-//
-//  ContentView.swift
-//  Deafield
-//
-//  Created by Davide Perrotta on 16/12/23.
-//
-
 import SwiftUI
 import AVFoundation
 import Accelerate
@@ -238,6 +231,7 @@ class Coordinator: NSObject, AVAudioRecorderDelegate {
 }
 struct ContentView: View {
     @StateObject private var audioRecorderManager = AudioRecorderManager()
+    @State private var showWelcomeSheet = !UserDefaults.standard.bool(forKey: "hasLaunchedBefore")
 
     var body: some View {
         NavigationView {
@@ -297,10 +291,72 @@ struct ContentView: View {
             .onAppear {
                 audioRecorderManager.loadPreviousRecords()
                 audioRecorderManager.requestRecordPermission()
+                
+                // Imposta il valore di hasLaunchedBefore a true dopo la prima apertura
+                UserDefaults.standard.set(true, forKey: "hasLaunchedBefore")
+            }
+            .sheet(isPresented: $showWelcomeSheet) {
+                WelcomeView {
+                    showWelcomeSheet = false
+                }
+                .background(Color(UIColor.systemBackground))
             }
         }
     }
 }
+
+struct WelcomeView: View {
+    var onContinue: () -> Void
+
+    var body: some View {
+        VStack {
+            
+            Spacer()
+            
+            // Icona di sistema
+            Image("icon")
+                .resizable()
+                .aspectRatio(contentMode: .fit)
+                .frame(width: 150, height: 150)
+                .foregroundColor(.blue)
+                .padding(10)
+
+            Text("DeaField welcomes you")
+                .font(.title)
+                .fontWeight(.bold)
+                .padding()
+
+            Text("Experience a new world of music perception, tailored to enhance your auditory journey even with hearing disabilities. Are you ready to embark on this discovery?")
+                .font(.body)
+                    .padding()
+                    .multilineTextAlignment(.center) // Allineamento al centro
+                    .lineSpacing(8)
+
+            Spacer()
+
+            Button(action: {
+                onContinue()
+            }) {
+                Text("Continue                                                                       ")
+                    .padding()
+                    .background(Color.blue)
+                    .foregroundColor(.white)
+                    .cornerRadius(10)
+            }
+            .frame(maxWidth: .infinity)
+            .frame(height: 50)
+
+            
+            .padding()
+        }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .background(Color(UIColor.systemBackground))
+        .cornerRadius(20)
+        .padding(20)
+        .transition(.move(edge: .bottom))
+    }
+}
+
 
 struct RecordingDetailView: View {
     var recordURL: URL
@@ -440,3 +496,9 @@ extension Collection {
     }
 }
 
+extension UserDefaults {
+    static var isFirstLaunch: Bool {
+        get { !standard.bool(forKey: "hasLaunchedBefore") }
+        set { standard.set(!newValue, forKey: "hasLaunchedBefore") }
+    }
+}
